@@ -1,0 +1,16 @@
+{
+  "name": "protype/kanboard-plugin-jwtauth",
+  "description": "Provide JWT authentication for Kanboard API",
+  "type": "library",
+  "require": {
+    "php": ">=7.2",
+    "firebase/php-jwt": "^5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "YourNamespace\\KanboardPluginJwtAuth\\": "src/"
+    }
+  },
+  "minimum-stability": "stable",
+  "license": "MIT"
+}
