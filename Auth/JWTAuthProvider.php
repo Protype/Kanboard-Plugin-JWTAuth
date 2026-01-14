@@ -6,6 +6,7 @@ use Kanboard\Plugin\JWTAuth\Controller\ConfigController;
 use Kanboard\Core\Security\PasswordAuthenticationProviderInterface;
 use Kanboard\User\DatabaseUserProvider;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 
 /*
@@ -112,7 +113,7 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
       ]
     );
 
-    return JWT::encode ($payload, $key);
+    return JWT::encode($payload, $key, 'HS256');
   }
 
 
@@ -130,7 +131,7 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
 
     try {
 
-      $decoded = JWT::decode ($token, $key, array('HS256'));
+      $decoded = JWT::decode($token, new Key($key, 'HS256'));
       $userSess = $decoded->data;
 
       if (empty ($userSess) || $this->username !== $userSess->username)
