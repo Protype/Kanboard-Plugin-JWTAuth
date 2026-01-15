@@ -42,7 +42,7 @@ curl -u "user:password" -X POST \
 {
   "result": {
     "name": "JWTAuth",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Provide JWT authentication for Kanboard API",
     "methods": [...]
   }
@@ -155,7 +155,7 @@ curl -u "user:password" -X POST \
 {
   "result": {
     "name": "JWTAuth",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Provide JWT authentication for Kanboard API",
     "methods": [...]
   }

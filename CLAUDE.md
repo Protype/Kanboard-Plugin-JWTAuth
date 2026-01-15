@@ -34,12 +34,12 @@ Run specific test suite:
 - Registers the settings route at `settings/jwtauth`
 - Hooks templates and assets into Kanboard's layout
 - Registers `JWTAuthProvider` when JWT is enabled
-- Exposes JSON-RPC API methods: `getJWTToken`, `refreshJWTToken`, `revokeJWTToken`, `revokeAllJWTTokens`
+- Exposes JSON-RPC API methods: `getJWTPlugin`, `getJWTToken`, `refreshJWTToken`, `revokeJWTToken`, `revokeUserJWTTokens`, `revokeAllJWTTokens`
 
 **Auth/JWTAuthProvider.php** - Implements `PasswordAuthenticationProviderInterface`:
 - `generateToken()` - Creates JWT(s) with user claims
 - `generateAccessToken()` / `generateRefreshToken()` - Dual token mode
-- `refreshToken($refreshToken)` - Exchange refresh token for new access token
+- `refreshToken($refreshToken)` - Exchange refresh token for new tokens (token rotation)
 - `revokeToken($token)` - Revoke a specific token
 - `revokeAllTokens($userId)` - Revoke all tokens for a user
 - `verifyToken($token)` - Validates JWT tokens using HS256 algorithm
@@ -66,10 +66,12 @@ Token structure includes:
 
 | Method | Description |
 |--------|-------------|
+| `getJWTPlugin` | Get plugin info and available methods |
 | `getJWTToken` | Get access + refresh tokens (dual mode) or single token (legacy) |
-| `refreshJWTToken` | Exchange refresh token for new access token |
+| `refreshJWTToken` | Exchange refresh token for new tokens (token rotation) |
 | `revokeJWTToken` | Revoke a specific token |
-| `revokeAllJWTTokens` | Revoke all tokens for current user |
+| `revokeUserJWTTokens` | Revoke all tokens for a specific user (admin only) |
+| `revokeAllJWTTokens` | Revoke all tokens in system (admin only) |
 
 ### API Testing
 
@@ -84,9 +86,9 @@ curl -X POST -u "admin:ACCESS_TOKEN" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getAllProjects", "id": 1}' \
   "http://localhost/jsonrpc.php"
 
-# Refresh token to get new access token
-curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "refreshJWTToken", "params": {"refresh_token": "REFRESH_TOKEN"}, "id": 1}' \
+# Refresh token (returns new access_token + refresh_token)
+curl -X POST -u "admin:access_token" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "refreshJWTToken", "params": ["REFRESH_TOKEN"], "id": 1}' \
   "http://localhost/jsonrpc.php"
 
 # Revoke a token
