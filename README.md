@@ -31,7 +31,7 @@ JWT authentication plugin for Kanboard API. Supports dual token mode (access + r
 ### Get Token
 
 ```sh
-curl -u "admin:password" -X POST \
+curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"getJWTToken","id":1}' \
   http://localhost/jsonrpc.php
 ```
@@ -44,7 +44,7 @@ curl -u "admin:password" -X POST \
 ### Use Token
 
 ```sh
-curl -u "admin:ACCESS_TOKEN" -X POST \
+curl -u "user:token" -X POST \
   -d '{"jsonrpc":"2.0","method":"getAllProjects","id":1}' \
   http://localhost/jsonrpc.php
 ```
@@ -52,15 +52,23 @@ curl -u "admin:ACCESS_TOKEN" -X POST \
 ### Refresh Token
 
 ```sh
-curl -u "admin:password" -X POST \
+curl -u "user:token" -X POST \
   -d '{"jsonrpc":"2.0","method":"refreshJWTToken","id":1,"params":["REFRESH_TOKEN"]}' \
+  http://localhost/jsonrpc.php
+```
+
+### Revoke Token
+
+```sh
+curl -u "user:token" -X POST \
+  -d '{"jsonrpc":"2.0","method":"revokeJWTToken","id":1,"params":["TOKEN_TO_REVOKE"]}' \
   http://localhost/jsonrpc.php
 ```
 
 ### Revoke User Tokens (Admin)
 
 ```sh
-curl -u "admin:password" -X POST \
+curl -u "admin:token" -X POST \
   -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
   http://localhost/jsonrpc.php
 ```
@@ -100,7 +108,7 @@ Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）�
 ### 取得 Token
 
 ```sh
-curl -u "admin:password" -X POST \
+curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"getJWTToken","id":1}' \
   http://localhost/jsonrpc.php
 ```
@@ -113,7 +121,7 @@ curl -u "admin:password" -X POST \
 ### 使用 Token
 
 ```sh
-curl -u "admin:ACCESS_TOKEN" -X POST \
+curl -u "user:token" -X POST \
   -d '{"jsonrpc":"2.0","method":"getAllProjects","id":1}' \
   http://localhost/jsonrpc.php
 ```
@@ -121,15 +129,23 @@ curl -u "admin:ACCESS_TOKEN" -X POST \
 ### 刷新 Token
 
 ```sh
-curl -u "admin:password" -X POST \
+curl -u "user:token" -X POST \
   -d '{"jsonrpc":"2.0","method":"refreshJWTToken","id":1,"params":["REFRESH_TOKEN"]}' \
+  http://localhost/jsonrpc.php
+```
+
+### 撤銷 Token
+
+```sh
+curl -u "user:token" -X POST \
+  -d '{"jsonrpc":"2.0","method":"revokeJWTToken","id":1,"params":["TOKEN_TO_REVOKE"]}' \
   http://localhost/jsonrpc.php
 ```
 
 ### 撤銷用戶 Token（管理員）
 
 ```sh
-curl -u "admin:password" -X POST \
+curl -u "admin:token" -X POST \
   -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
   http://localhost/jsonrpc.php
 ```
