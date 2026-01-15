@@ -43,6 +43,9 @@ class Plugin extends Base {
 
       $jwtAuthProvider = new Auth\JWTAuthProvider ($this->container);
 
+      // Register JWT plugin info API method
+      $this->api->getProcedureHandler()->withClassAndMethod('getJWTPlugin', $this, 'getPluginInfo');
+
       // Register JWT token generation API method
       $this->api->getProcedureHandler()->withClassAndMethod('getJWTToken', $jwtAuthProvider, 'generateToken');
 
@@ -111,5 +114,27 @@ class Plugin extends Base {
    */
   public function getPluginHomepage () {
     return 'https://github.com/Protype/Kanboard-Plugin-JWTAuth';
+  }
+
+
+  /*
+   *
+   * Get plugin info for API
+   *
+   */
+  public function getPluginInfo () {
+    return [
+      'name' => $this->getPluginName(),
+      'version' => $this->getPluginVersion(),
+      'description' => $this->getPluginDescription(),
+      'methods' => [
+        ['name' => 'getJWTPlugin', 'description' => 'Get plugin info and available methods'],
+        ['name' => 'getJWTToken', 'description' => 'Get access + refresh tokens'],
+        ['name' => 'refreshJWTToken', 'description' => 'Exchange refresh token for new access token'],
+        ['name' => 'revokeJWTToken', 'description' => 'Revoke a specific token'],
+        ['name' => 'revokeUserJWTTokens', 'description' => 'Revoke all tokens for a specific user (admin only)'],
+        ['name' => 'revokeAllJWTTokens', 'description' => 'Revoke all tokens (admin only)'],
+      ],
+    ];
   }
 }
