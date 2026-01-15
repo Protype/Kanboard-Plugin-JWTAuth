@@ -49,7 +49,7 @@ curl -u "user:password" -X POST \
 ### Use Token
 
 ```sh
-curl -u "user:token" -X POST \
+curl -u "user:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"getAllProjects","id":1}' \
   http://localhost/jsonrpc.php
 ```
@@ -57,7 +57,7 @@ curl -u "user:token" -X POST \
 ### Refresh Token
 
 ```sh
-curl -u "user:token" -X POST \
+curl -u "user:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"refreshJWTToken","id":1,"params":["REFRESH_TOKEN"]}' \
   http://localhost/jsonrpc.php
 ```
@@ -65,7 +65,7 @@ curl -u "user:token" -X POST \
 ### Revoke Token
 
 ```sh
-curl -u "user:token" -X POST \
+curl -u "user:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"revokeJWTToken","id":1,"params":["TOKEN_TO_REVOKE"]}' \
   http://localhost/jsonrpc.php
 ```
@@ -73,7 +73,7 @@ curl -u "user:token" -X POST \
 ### Revoke User Tokens (Admin)
 
 ```sh
-curl -u "admin:token" -X POST \
+curl -u "admin:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
   http://localhost/jsonrpc.php
 ```
@@ -131,7 +131,7 @@ curl -u "user:password" -X POST \
 ### 使用 Token
 
 ```sh
-curl -u "user:token" -X POST \
+curl -u "user:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"getAllProjects","id":1}' \
   http://localhost/jsonrpc.php
 ```
@@ -139,7 +139,7 @@ curl -u "user:token" -X POST \
 ### 刷新 Token
 
 ```sh
-curl -u "user:token" -X POST \
+curl -u "user:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"refreshJWTToken","id":1,"params":["REFRESH_TOKEN"]}' \
   http://localhost/jsonrpc.php
 ```
@@ -147,7 +147,7 @@ curl -u "user:token" -X POST \
 ### 撤銷 Token
 
 ```sh
-curl -u "user:token" -X POST \
+curl -u "user:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"revokeJWTToken","id":1,"params":["TOKEN_TO_REVOKE"]}' \
   http://localhost/jsonrpc.php
 ```
@@ -155,7 +155,7 @@ curl -u "user:token" -X POST \
 ### 撤銷用戶 Token（管理員）
 
 ```sh
-curl -u "admin:token" -X POST \
+curl -u "admin:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
   http://localhost/jsonrpc.php
 ```
