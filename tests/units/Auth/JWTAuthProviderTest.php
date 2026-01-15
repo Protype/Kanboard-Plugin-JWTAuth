@@ -395,4 +395,302 @@ class JWTAuthProviderTest extends Base
 
         $this->assertTrue($newProvider->authenticate());
     }
+
+    // ========================================
+    // Phase 1.1: Dual Token Structure Tests
+    // ========================================
+
+    /**
+     * Test generateToken returns both access and refresh tokens
+     */
+    public function testGenerateTokenReturnsAccessAndRefreshTokens(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $result = $provider->generateToken();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('access_token', $result);
+        $this->assertArrayHasKey('refresh_token', $result);
+        $this->assertNotEmpty($result['access_token']);
+        $this->assertNotEmpty($result['refresh_token']);
+    }
+
+    /**
+     * Test access token has correct type claim
+     */
+    public function testAccessTokenHasCorrectType(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $result = $provider->generateToken();
+
+        $decoded = JWT::decode($result['access_token'], new Key($this->testSecret, 'HS256'));
+
+        $this->assertObjectHasProperty('type', $decoded);
+        $this->assertEquals('access', $decoded->type);
+    }
+
+    /**
+     * Test refresh token has correct type claim
+     */
+    public function testRefreshTokenHasCorrectType(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $result = $provider->generateToken();
+
+        $decoded = JWT::decode($result['refresh_token'], new Key($this->testSecret, 'HS256'));
+
+        $this->assertObjectHasProperty('type', $decoded);
+        $this->assertEquals('refresh', $decoded->type);
+    }
+
+    /**
+     * Test access token expires in configured time (default 1 hour)
+     */
+    public function testAccessTokenExpiresInOneHour(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $result = $provider->generateToken();
+
+        $decoded = JWT::decode($result['access_token'], new Key($this->testSecret, 'HS256'));
+
+        $expectedExp = $decoded->iat + 3600;
+        $this->assertEquals($expectedExp, $decoded->exp);
+    }
+
+    /**
+     * Test refresh token expires in configured time (default 30 days)
+     */
+    public function testRefreshTokenExpiresInThirtyDays(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $result = $provider->generateToken();
+
+        $decoded = JWT::decode($result['refresh_token'], new Key($this->testSecret, 'HS256'));
+
+        $expectedExp = $decoded->iat + 2592000;
+        $this->assertEquals($expectedExp, $decoded->exp);
+    }
+
+    /**
+     * Test both tokens have unique JTI (JWT ID)
+     */
+    public function testTokensHaveUniqueJti(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $result = $provider->generateToken();
+
+        $accessDecoded = JWT::decode($result['access_token'], new Key($this->testSecret, 'HS256'));
+        $refreshDecoded = JWT::decode($result['refresh_token'], new Key($this->testSecret, 'HS256'));
+
+        $this->assertObjectHasProperty('jti', $accessDecoded);
+        $this->assertObjectHasProperty('jti', $refreshDecoded);
+        $this->assertNotEmpty($accessDecoded->jti);
+        $this->assertNotEmpty($refreshDecoded->jti);
+        $this->assertNotEquals($accessDecoded->jti, $refreshDecoded->jti);
+    }
+
+    // ========================================
+    // Phase 1.2: Refresh Token Tests
+    // ========================================
+
+    /**
+     * Test refreshToken with valid refresh token returns new tokens
+     */
+    public function testRefreshTokenWithValidRefreshToken(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $tokens = $provider->generateToken();
+
+        $result = $provider->refreshToken($tokens['refresh_token']);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('access_token', $result);
+    }
+
+    /**
+     * Test refreshToken returns new access token with correct type
+     */
+    public function testRefreshTokenReturnsNewAccessToken(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $tokens = $provider->generateToken();
+
+        $result = $provider->refreshToken($tokens['refresh_token']);
+
+        $decoded = JWT::decode($result['access_token'], new Key($this->testSecret, 'HS256'));
+        $this->assertEquals('access', $decoded->type);
+    }
+
+    /**
+     * Test refreshToken fails when using access token instead of refresh token
+     */
+    public function testRefreshTokenFailsWithAccessToken(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $tokens = $provider->generateToken();
+
+        $result = $provider->refreshToken($tokens['access_token']);
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test refreshToken fails with expired refresh token
+     */
+    public function testRefreshTokenFailsWithExpiredToken(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        // Create an expired refresh token manually
+        $payload = [
+            'jti' => bin2hex(random_bytes(16)),
+            'type' => 'refresh',
+            'iss' => 'http://test.local/',
+            'aud' => 'http://test.local/',
+            'iat' => time() - 3600000,
+            'nbf' => time() - 3600000,
+            'exp' => time() - 3600, // Expired
+            'data' => [
+                'id' => 1,
+                'username' => 'admin',
+            ],
+        ];
+
+        $expiredRefreshToken = JWT::encode($payload, $this->testSecret, 'HS256');
+
+        $provider = new JWTAuthProvider($this->container);
+        $result = $provider->refreshToken($expiredRefreshToken);
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test refreshToken fails with invalid token
+     */
+    public function testRefreshTokenFailsWithInvalidToken(): void
+    {
+        $provider = new JWTAuthProvider($this->container);
+        $result = $provider->refreshToken('invalid-token-string');
+
+        $this->assertFalse($result);
+    }
+
+    // ========================================
+    // Phase 1.3: Revoke Token Tests
+    // ========================================
+
+    /**
+     * Test revokeToken successfully revokes a token
+     */
+    public function testRevokeTokenSuccess(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $tokens = $provider->generateToken();
+
+        $result = $provider->revokeToken($tokens['access_token']);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test revoked token cannot be used for authentication
+     */
+    public function testRevokedTokenCannotAuthenticate(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $tokens = $provider->generateToken();
+
+        // Revoke the access token
+        $provider->revokeToken($tokens['access_token']);
+
+        // Try to authenticate with revoked token
+        $provider->setUsername('admin');
+        $provider->setPassword($tokens['access_token']);
+
+        $result = $provider->authenticate();
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test revoked refresh token cannot be used to refresh
+     */
+    public function testRevokedRefreshTokenCannotRefresh(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+        $tokens = $provider->generateToken();
+
+        // Revoke the refresh token
+        $provider->revokeToken($tokens['refresh_token']);
+
+        // Try to refresh with revoked token
+        $result = $provider->refreshToken($tokens['refresh_token']);
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test revokeAllTokens revokes all tokens for a user
+     */
+    public function testRevokeAllUserTokens(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $provider = new JWTAuthProvider($this->container);
+
+        // Generate multiple token pairs
+        $tokens1 = $provider->generateToken();
+        $tokens2 = $provider->generateToken();
+
+        // Revoke all tokens for user
+        $result = $provider->revokeAllTokens(1);
+
+        $this->assertTrue($result);
+
+        // Both should fail authentication
+        $provider->setUsername('admin');
+        $provider->setPassword($tokens1['access_token']);
+        $this->assertFalse($provider->authenticate());
+
+        $provider->setPassword($tokens2['access_token']);
+        $this->assertFalse($provider->authenticate());
+    }
 }

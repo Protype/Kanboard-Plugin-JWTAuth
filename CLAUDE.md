@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Kanboard-Plugin-JWTAuth is a Kanboard plugin that provides JWT (JSON Web Token) authentication for the Kanboard API. It allows users to authenticate using JWT tokens instead of sending credentials with each request.
+Kanboard-Plugin-JWTAuth is a Kanboard plugin that provides JWT (JSON Web Token) authentication for the Kanboard API. It supports both single token (legacy) and dual token (access + refresh) modes.
 
 ## Commands
 
@@ -33,48 +33,84 @@ Run specific test suite:
 **Plugin.php** - Entry point that:
 - Registers the settings route at `settings/jwtauth`
 - Hooks templates and assets into Kanboard's layout
-- Registers `JWTAuthProvider` when JWT is enabled (`jwt_enable` config)
-- Exposes `getJWTToken` JSON-RPC API method
+- Registers `JWTAuthProvider` when JWT is enabled
+- Exposes JSON-RPC API methods: `getJWTToken`, `refreshJWTToken`, `revokeJWTToken`, `revokeAllJWTTokens`
 
 **Auth/JWTAuthProvider.php** - Implements `PasswordAuthenticationProviderInterface`:
-- `generateToken()` - Creates JWT with user claims (iss, aud, exp, user data)
+- `generateToken()` - Creates JWT(s) with user claims
+- `generateAccessToken()` / `generateRefreshToken()` - Dual token mode
+- `refreshToken($refreshToken)` - Exchange refresh token for new access token
+- `revokeToken($token)` - Revoke a specific token
+- `revokeAllTokens($userId)` - Revoke all tokens for a user
 - `verifyToken($token)` - Validates JWT tokens using HS256 algorithm
 - `authenticate()` - Called by Kanboard's auth manager
-- `setPassword($jwtToken)` - Receives JWT via basic auth password field
 
-**Controller/ConfigController.php** - Settings management:
-- `generateSecret()` - Creates cryptographically secure random key using `openssl_random_pseudo_bytes`
-- `show()` / `save()` - Render and persist settings form
+**Model/JWTRevokedTokenModel.php** - Token revocation storage:
+- `add($jti, $userId, $tokenType, $expiresAt)` - Add revoked token
+- `isRevoked($jti)` - Check if token is revoked
+- `revokeAllByUser($userId)` - Revoke all user tokens
 
-### Authentication Flow
+### Dual Token Mode
 
-1. Client calls `getJWTToken` JSON-RPC method with basic auth credentials
-2. Plugin returns signed JWT token containing user ID and username
-3. Client uses JWT as password in subsequent basic auth requests (username must match token)
-4. `JWTAuthProvider.authenticate()` validates token signature and username match
+When `jwt_access_expiration` is configured, the plugin operates in dual token mode:
+
+- **Access Token**: Short-lived (default 1 hour), used for API authentication
+- **Refresh Token**: Long-lived (default 30 days), used to obtain new access tokens
+
+Token structure includes:
+- `jti` - Unique token ID for revocation tracking
+- `type` - Token type ('access' or 'refresh')
+- Standard JWT claims (iss, aud, iat, nbf, exp, data)
+
+### API Methods
+
+| Method | Description |
+|--------|-------------|
+| `getJWTToken` | Get access + refresh tokens (dual mode) or single token (legacy) |
+| `refreshJWTToken` | Exchange refresh token for new access token |
+| `revokeJWTToken` | Revoke a specific token |
+| `revokeAllJWTTokens` | Revoke all tokens for current user |
 
 ### API Testing
 
 ```sh
-# Get JWT token (requires basic auth)
+# Get JWT tokens (dual mode returns access_token + refresh_token)
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getJWTToken", "id": 1}' \
   "http://localhost/jsonrpc.php"
 
-# Use JWT token (replace password with token)
-curl -X POST -u "admin:YOUR_JWT_TOKEN" -H "Content-Type: application/json" \
+# Use access token for API requests
+curl -X POST -u "admin:ACCESS_TOKEN" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getAllProjects", "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# Refresh token to get new access token
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "refreshJWTToken", "params": {"refresh_token": "REFRESH_TOKEN"}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# Revoke a token
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "revokeJWTToken", "params": {"token": "TOKEN_TO_REVOKE"}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 ```
 
 ### Configuration Keys
 
 Stored in Kanboard's config model:
+
+**Basic Settings:**
 - `jwt_enable` - Enable/disable JWT authentication
 - `jwt_secret` - HS256 signing key (auto-generated if empty)
 - `jwt_issuer` - Token issuer claim (defaults to application URL)
 - `jwt_audience` - Token audience claim (defaults to application URL)
+
+**Legacy Mode (single token):**
 - `jwt_expiration` - Token TTL in seconds (default: 259200 = 3 days)
+
+**Dual Token Mode:**
+- `jwt_access_expiration` - Access token TTL (default: 3600 = 1 hour)
+- `jwt_refresh_expiration` - Refresh token TTL (default: 2592000 = 30 days)
 
 ### Dependencies
 

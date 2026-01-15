@@ -34,6 +34,11 @@ abstract class Base extends TestCase
     ];
 
     /**
+     * @var array Mock revoked tokens storage
+     */
+    protected $revokedTokensStorage = [];
+
+    /**
      * Set up test environment
      */
     protected function setUp(): void
@@ -42,10 +47,12 @@ abstract class Base extends TestCase
 
         $this->container = new Container();
         $this->configStorage = [];
+        $this->revokedTokensStorage = [];
 
         $this->setupConfigModel();
         $this->setupUserSession();
         $this->setupHelper();
+        $this->setupRevokedTokenModel();
     }
 
     /**
@@ -113,6 +120,17 @@ abstract class Base extends TestCase
     }
 
     /**
+     * Set up mock revoked token model
+     */
+    protected function setupRevokedTokenModel(): void
+    {
+        $storage = &$this->revokedTokensStorage;
+
+        $model = new MockRevokedTokenModel($storage);
+        $this->container['jwtRevokedTokenModel'] = $model;
+    }
+
+    /**
      * Set a config value for testing
      */
     protected function setConfig(string $key, $value): void
@@ -164,5 +182,68 @@ class MockUrlHelper
     public function base(): string
     {
         return 'http://localhost/';
+    }
+}
+
+/**
+ * Mock Revoked Token Model for testing
+ */
+class MockRevokedTokenModel
+{
+    private $storage;
+
+    public function __construct(array &$storage)
+    {
+        $this->storage = &$storage;
+    }
+
+    public function add(string $jti, int $userId, string $tokenType, int $expiresAt): bool
+    {
+        $this->storage[$jti] = [
+            'jti' => $jti,
+            'user_id' => $userId,
+            'token_type' => $tokenType,
+            'revoked_at' => time(),
+            'expires_at' => $expiresAt,
+        ];
+        return true;
+    }
+
+    public function isRevoked(string $jti): bool
+    {
+        return isset($this->storage[$jti]);
+    }
+
+    public function revokeAllByUser(int $userId): bool
+    {
+        // Mark that all tokens for this user are revoked
+        $this->storage["__user_revoked_{$userId}"] = [
+            'user_id' => $userId,
+            'revoked_at' => time(),
+        ];
+        return true;
+    }
+
+    public function isUserRevoked(int $userId, int $tokenIssuedAt): bool
+    {
+        $key = "__user_revoked_{$userId}";
+        if (isset($this->storage[$key])) {
+            // Tokens issued at or before the revocation time are considered revoked
+            return $this->storage[$key]['revoked_at'] >= $tokenIssuedAt;
+        }
+        return false;
+    }
+
+    public function cleanup(): int
+    {
+        $count = 0;
+        $now = time();
+        foreach ($this->storage as $jti => $data) {
+            if (isset($data['expires_at']) && $data['expires_at'] < $now) {
+                unset($this->storage[$jti]);
+                $count++;
+            }
+        }
+        return $count;
     }
 }

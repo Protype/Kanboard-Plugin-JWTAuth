@@ -33,6 +33,11 @@ class Plugin extends Base {
       return new ConfigController($c);
     });
 
+    // Register revoked token model
+    $this->container['jwtRevokedTokenModel'] = function ($c) {
+      return new Model\JWTRevokedTokenModel ($c['db']);
+    };
+
     // If JWT authentication is enabled
     if ($this->configModel->get('jwt_enable', '') === '1') {
 
@@ -40,7 +45,16 @@ class Plugin extends Base {
 
       // Register JWT token generation API method
       $this->api->getProcedureHandler()->withClassAndMethod('getJWTToken', $jwtAuthProvider, 'generateToken');
-  
+
+      // Register JWT refresh token API method
+      $this->api->getProcedureHandler()->withClassAndMethod('refreshJWTToken', $jwtAuthProvider, 'refreshToken');
+
+      // Register JWT revoke token API method
+      $this->api->getProcedureHandler()->withClassAndMethod('revokeJWTToken', $jwtAuthProvider, 'revokeToken');
+
+      // Register JWT revoke all tokens API method
+      $this->api->getProcedureHandler()->withClassAndMethod('revokeAllJWTTokens', $jwtAuthProvider, 'revokeAllTokens');
+
       // Register JWT authentication provider
       $this->authenticationManager->register ($jwtAuthProvider);
     }
@@ -73,7 +87,7 @@ class Plugin extends Base {
    *
    */
   public function getPluginVersion () {
-    return '1.0.0';
+    return '2.0.0';
   }
 
 

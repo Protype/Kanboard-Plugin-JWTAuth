@@ -265,4 +265,199 @@ class JWTApiProcedureTest extends Base
         // That check is done in Plugin.php when registering the provider
         $this->assertTrue($authProvider->authenticate());
     }
+
+    // ========================================
+    // Phase 1.4: Dual Token Integration Tests
+    // ========================================
+
+    /**
+     * Test complete token lifecycle with dual tokens
+     */
+    public function testCompleteTokenLifecycle(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'admin',
+        ]);
+
+        // Step 1: Get initial tokens
+        $provider = new JWTAuthProvider($this->container);
+        $tokens = $provider->generateToken();
+
+        $this->assertIsArray($tokens);
+        $this->assertArrayHasKey('access_token', $tokens);
+        $this->assertArrayHasKey('refresh_token', $tokens);
+
+        // Step 2: Use access token for authentication
+        $authProvider = new JWTAuthProvider($this->container);
+        $authProvider->setUsername('admin');
+        $authProvider->setPassword($tokens['access_token']);
+
+        $this->assertTrue($authProvider->authenticate());
+        $this->assertNotNull($authProvider->getUser());
+
+        // Step 3: Refresh to get new access token
+        $newTokens = $provider->refreshToken($tokens['refresh_token']);
+
+        $this->assertIsArray($newTokens);
+        $this->assertArrayHasKey('access_token', $newTokens);
+
+        // Step 4: New access token should work
+        $newAuthProvider = new JWTAuthProvider($this->container);
+        $newAuthProvider->setUsername('admin');
+        $newAuthProvider->setPassword($newTokens['access_token']);
+
+        $this->assertTrue($newAuthProvider->authenticate());
+    }
+
+    /**
+     * Test refresh token flow end-to-end
+     */
+    public function testRefreshTokenFlow(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'admin',
+        ]);
+
+        $provider = new JWTAuthProvider($this->container);
+
+        // Get initial tokens
+        $tokens = $provider->generateToken();
+
+        // Refresh multiple times
+        for ($i = 0; $i < 3; $i++) {
+            $newTokens = $provider->refreshToken($tokens['refresh_token']);
+
+            $this->assertIsArray($newTokens, "Refresh failed on iteration {$i}");
+            $this->assertArrayHasKey('access_token', $newTokens);
+
+            // Verify new access token works
+            $authProvider = new JWTAuthProvider($this->container);
+            $authProvider->setUsername('admin');
+            $authProvider->setPassword($newTokens['access_token']);
+
+            $this->assertTrue($authProvider->authenticate(), "Auth failed on iteration {$i}");
+        }
+    }
+
+    /**
+     * Test revoke token flow end-to-end
+     */
+    public function testRevokeTokenFlow(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'admin',
+        ]);
+
+        $provider = new JWTAuthProvider($this->container);
+
+        // Get tokens
+        $tokens = $provider->generateToken();
+
+        // Verify access token works before revocation
+        $authProvider = new JWTAuthProvider($this->container);
+        $authProvider->setUsername('admin');
+        $authProvider->setPassword($tokens['access_token']);
+        $this->assertTrue($authProvider->authenticate());
+
+        // Revoke access token
+        $this->assertTrue($provider->revokeToken($tokens['access_token']));
+
+        // Verify access token no longer works
+        $authProvider2 = new JWTAuthProvider($this->container);
+        $authProvider2->setUsername('admin');
+        $authProvider2->setPassword($tokens['access_token']);
+        $this->assertFalse($authProvider2->authenticate());
+
+        // Verify refresh token still works (wasn't revoked)
+        $newTokens = $provider->refreshToken($tokens['refresh_token']);
+        $this->assertIsArray($newTokens);
+    }
+
+    /**
+     * Test revoke all tokens for user
+     */
+    public function testRevokeAllTokensFlow(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'admin',
+        ]);
+
+        $provider = new JWTAuthProvider($this->container);
+
+        // Generate multiple token pairs
+        $tokens1 = $provider->generateToken();
+        $tokens2 = $provider->generateToken();
+        $tokens3 = $provider->generateToken();
+
+        // Revoke all tokens for user
+        $this->assertTrue($provider->revokeAllTokens(1));
+
+        // All access tokens should fail
+        foreach ([$tokens1, $tokens2, $tokens3] as $tokens) {
+            $authProvider = new JWTAuthProvider($this->container);
+            $authProvider->setUsername('admin');
+            $authProvider->setPassword($tokens['access_token']);
+            $this->assertFalse($authProvider->authenticate());
+        }
+
+        // All refresh tokens should fail
+        foreach ([$tokens1, $tokens2, $tokens3] as $tokens) {
+            $result = $provider->refreshToken($tokens['refresh_token']);
+            $this->assertFalse($result);
+        }
+    }
+
+    /**
+     * Test dual token system with different users
+     */
+    public function testDualTokenWithMultipleUsers(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+        $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        $userTokens = [];
+
+        // Generate tokens for multiple users
+        for ($userId = 1; $userId <= 3; $userId++) {
+            $this->setUserSession([
+                'id' => $userId,
+                'username' => "user{$userId}",
+            ]);
+
+            $provider = new JWTAuthProvider($this->container);
+            $userTokens[$userId] = $provider->generateToken();
+        }
+
+        // Each user's token should only work for that user
+        foreach ($userTokens as $userId => $tokens) {
+            $authProvider = new JWTAuthProvider($this->container);
+            $authProvider->setUsername("user{$userId}");
+            $authProvider->setPassword($tokens['access_token']);
+
+            $this->assertTrue($authProvider->authenticate(), "User {$userId} auth failed");
+
+            // Try with wrong username
+            $wrongProvider = new JWTAuthProvider($this->container);
+            $wrongProvider->setUsername("wronguser");
+            $wrongProvider->setPassword($tokens['access_token']);
+
+            $this->assertFalse($wrongProvider->authenticate());
+        }
+    }
 }
