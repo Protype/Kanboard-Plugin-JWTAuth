@@ -18,12 +18,13 @@ JWT authentication plugin for Kanboard API. Supports dual token mode (access + r
 
 ## API Methods
 
-| Method | Description |
-|--------|-------------|
-| `getJWTToken` | Get token(s) with basic auth |
-| `refreshJWTToken` | Exchange refresh token for new access token |
-| `revokeJWTToken` | Revoke a specific token |
-| `revokeAllJWTTokens` | Revoke all user tokens |
+| Method | Permission | Description |
+|--------|------------|-------------|
+| `getJWTToken` | Any user | Get token(s) with basic auth |
+| `refreshJWTToken` | Any user | Exchange refresh token for new access token |
+| `revokeJWTToken` | Any user | Revoke own token only |
+| `revokeUserJWTTokens` | Admin | Revoke all tokens for a specific user |
+| `revokeAllJWTTokens` | Admin | Revoke all tokens in system |
 
 ## Usage
 
@@ -56,6 +57,14 @@ curl -u "admin:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+### Revoke User Tokens (Admin)
+
+```sh
+curl -u "admin:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
+  http://localhost/jsonrpc.php
+```
+
 ---
 
 # Kanboard-Plugin-JWTAuth (繁體中文)
@@ -78,12 +87,13 @@ Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）�
 
 ## API 方法
 
-| 方法 | 說明 |
-|-----|------|
-| `getJWTToken` | 使用基本認證取得 Token |
-| `refreshJWTToken` | 用刷新 Token 換取新的存取 Token |
-| `revokeJWTToken` | 撤銷指定 Token |
-| `revokeAllJWTTokens` | 撤銷使用者所有 Token |
+| 方法 | 權限 | 說明 |
+|-----|------|-----|
+| `getJWTToken` | 任何用戶 | 使用基本認證取得 Token |
+| `refreshJWTToken` | 任何用戶 | 用刷新 Token 換取新的存取 Token |
+| `revokeJWTToken` | 任何用戶 | 僅能撤銷自己的 Token |
+| `revokeUserJWTTokens` | 管理員 | 撤銷指定用戶的所有 Token |
+| `revokeAllJWTTokens` | 管理員 | 撤銷系統所有 Token |
 
 ## 使用方式
 
@@ -113,5 +123,13 @@ curl -u "admin:ACCESS_TOKEN" -X POST \
 ```sh
 curl -u "admin:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"refreshJWTToken","id":1,"params":["REFRESH_TOKEN"]}' \
+  http://localhost/jsonrpc.php
+```
+
+### 撤銷用戶 Token（管理員）
+
+```sh
+curl -u "admin:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
   http://localhost/jsonrpc.php
 ```
