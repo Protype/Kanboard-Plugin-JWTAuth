@@ -38,9 +38,16 @@ class ConfigController extends BaseController {
    *
    */
   public function show () {
+    $values = $this->configModel->getAll();
+
+    // Pre-generate secret if empty
+    if (empty($values['jwt_secret'])) {
+      $values['jwt_secret'] = $this->generateSecret();
+    }
+
     $this->response->html ($this->helper->layout->config ('JWTAuth:config/settings', [
       'title' => t('JWT settings'),
-      'values' => $this->configModel->getAll (),
+      'values' => $values,
     ]));
   }
 

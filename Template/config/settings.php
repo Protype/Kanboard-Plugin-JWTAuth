@@ -13,10 +13,9 @@
   </div>
 
   <div class="form-group">
-    <label for="api_key"><?= t('JWT Secret') ?></label>
+    <label for="api_key"><?= t('JWT Secret') ?> *</label>
     <input type="text" name="jwt_secret" id="jwt_secret" class="form-control" value="<?= $this->task->configModel->get('jwt_secret', '') ?>"
       <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
-    <p class="form-help"><?= t('Leave it empty if you want to generate a random secret automatically on save') ?></p>
   </div>
 
   <div class="form-group">
@@ -34,15 +33,15 @@
   <div class="form-group">
     <label for="jwt_access_expiration"><?= t('Access Token Expiration (seconds)') ?></label>
     <input type="number" name="jwt_access_expiration" id="jwt_access_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_access_expiration', '') ?>"
+      placeholder="259200"
       <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
-    <p class="form-help"><?= t('259200 seconds in default (3 days)') ?></p>
   </div>
 
   <div class="form-group">
     <label for="jwt_refresh_expiration"><?= t('Refresh Token Expiration (seconds)') ?></label>
     <input type="number" name="jwt_refresh_expiration" id="jwt_refresh_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_refresh_expiration', '') ?>"
+      placeholder="2592000"
       <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
-    <p class="form-help"><?= t('2592000 seconds in default (30 days)') ?></p>
   </div>
 
   <div class="form-actions">
