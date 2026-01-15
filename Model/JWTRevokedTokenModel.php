@@ -137,10 +137,6 @@ class JWTRevokedTokenModel
             ->eq('jti', '__global_revoke__')
             ->findOne();
 
-        if ($record && $record['revoked_at'] >= $tokenIssuedAt) {
-            return true;
-        }
-
-        return false;
+        return $record && $record['revoked_at'] >= $tokenIssuedAt;
     }
 }

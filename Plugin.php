@@ -4,125 +4,98 @@ namespace Kanboard\Plugin\JWTAuth;
 
 use Kanboard\Core\Plugin\Base;
 
-
-/*
- *
- * Plugin
- *
+/**
+ * JWT Authentication Plugin for Kanboard
  */
-class Plugin extends Base {
-
-
-  /*
-   *
+class Plugin extends Base
+{
+  /**
    * Initialize plugin
-   *
    */
-  public function initialize () {
-
-    // Register JWT config page
+  public function initialize()
+  {
     $this->template->hook->attach('template:config:sidebar', 'JWTAuth:config/sidebar');
     $this->hook->on('template:layout:js', array('template' => 'plugins/JWTAuth/Assets/settings.js'));
     $this->hook->on('template:layout:css', array('template' => 'plugins/JWTAuth/Assets/settings.css'));
-    
-    // Register JWT config route
+
     $this->route->addRoute('settings/jwtauth', 'ConfigController', 'show', 'JWTAuth');
-    
-    // Register JWT config controller
+
     $this->container['configController'] = $this->container->factory(function ($c) {
       return new ConfigController($c);
     });
 
-    // Register revoked token model
     $this->container['jwtRevokedTokenModel'] = function ($c) {
-      return new Model\JWTRevokedTokenModel ($c['db']);
+      return new Model\JWTRevokedTokenModel($c['db']);
     };
 
-    // If JWT authentication is enabled
     if ($this->configModel->get('jwt_enable', '') === '1') {
-
-      $jwtAuthProvider = new Auth\JWTAuthProvider ($this->container);
-
-      // Register JWT plugin info API method
-      $this->api->getProcedureHandler()->withClassAndMethod('getJWTPlugin', $this, 'getPluginInfo');
-
-      // Register JWT token generation API method
-      $this->api->getProcedureHandler()->withClassAndMethod('getJWTToken', $jwtAuthProvider, 'generateToken');
-
-      // Register JWT refresh token API method
-      $this->api->getProcedureHandler()->withClassAndMethod('refreshJWTToken', $jwtAuthProvider, 'refreshToken');
-
-      // Register JWT revoke token API method (own token only)
-      $this->api->getProcedureHandler()->withClassAndMethod('revokeJWTToken', $jwtAuthProvider, 'revokeToken');
-
-      // Register JWT revoke user tokens API method (admin only)
-      $this->api->getProcedureHandler()->withClassAndMethod('revokeUserJWTTokens', $jwtAuthProvider, 'revokeUserTokens');
-
-      // Register JWT revoke all tokens API method (admin only)
-      $this->api->getProcedureHandler()->withClassAndMethod('revokeAllJWTTokens', $jwtAuthProvider, 'revokeAllTokens');
-
-      // Register JWT authentication provider
-      $this->authenticationManager->register ($jwtAuthProvider);
+      $this->registerJWTAuthentication();
     }
   }
 
-
-  /*
-   *
-   * Get plugin name
-   *
+  /**
+   * Register JWT authentication provider and API methods
    */
-  public function getPluginName () {
+  private function registerJWTAuthentication()
+  {
+    $jwtAuthProvider = new Auth\JWTAuthProvider($this->container);
+    $procedureHandler = $this->api->getProcedureHandler();
+
+    $procedureHandler->withClassAndMethod('getJWTPlugin', $this, 'getPluginInfo');
+    $procedureHandler->withClassAndMethod('getJWTToken', $jwtAuthProvider, 'generateToken');
+    $procedureHandler->withClassAndMethod('refreshJWTToken', $jwtAuthProvider, 'refreshToken');
+    $procedureHandler->withClassAndMethod('revokeJWTToken', $jwtAuthProvider, 'revokeToken');
+    $procedureHandler->withClassAndMethod('revokeUserJWTTokens', $jwtAuthProvider, 'revokeUserTokens');
+    $procedureHandler->withClassAndMethod('revokeAllJWTTokens', $jwtAuthProvider, 'revokeAllTokens');
+
+    $this->authenticationManager->register($jwtAuthProvider);
+  }
+
+  /**
+   * Get plugin name
+   */
+  public function getPluginName()
+  {
     return 'JWTAuth';
   }
 
-
-  /*
-   *
+  /**
    * Get plugin author
-   *
    */
-  public function getPluginAuthor () {
+  public function getPluginAuthor()
+  {
     return 'Protype';
   }
 
-
-  /*
-   *
+  /**
    * Get plugin version
-   *
    */
-  public function getPluginVersion () {
+  public function getPluginVersion()
+  {
     return '1.3.0';
   }
 
-
-  /*
-   *
+  /**
    * Get plugin description
-   *
    */
-  public function getPluginDescription () {
+  public function getPluginDescription()
+  {
     return 'Provide JWT authentication for Kanboard API';
   }
 
-
-  /*
-   *
+  /**
    * Get plugin homepage
-   *
    */
-  public function getPluginHomepage () {
+  public function getPluginHomepage()
+  {
     return 'https://github.com/Protype/Kanboard-Plugin-JWTAuth';
   }
 
-
-  /*
-   *
+  /**
    * Get plugin info for API
-   *
    */
-  public function getPluginInfo () {
+  public function getPluginInfo()
+  {
     return [
       'name' => $this->getPluginName(),
       'version' => $this->getPluginVersion(),

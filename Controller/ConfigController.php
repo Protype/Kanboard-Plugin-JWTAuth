@@ -5,78 +5,62 @@ namespace Kanboard\Plugin\JWTAuth\Controller;
 use Kanboard\Controller\BaseController;
 use Firebase\JWT\JWT;
 
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-/*
- *
- * Require JWT library
- *
+/**
+ * Config Controller for JWT settings
  */
-require_once dirname (__DIR__) . '/vendor/autoload.php';
-
-
-/*
- *
- * Config Controller
- *
- */
-class ConfigController extends BaseController {
-
-
-  /*
-   *
-   * Generate jwt secret
-   *
+class ConfigController extends BaseController
+{
+  /**
+   * Generate JWT secret
    */
-  public function generateSecret () {
-    return JWT::urlsafeB64Encode (openssl_random_pseudo_bytes (32));
+  public function generateSecret()
+  {
+    return JWT::urlsafeB64Encode(openssl_random_pseudo_bytes(32));
   }
 
-  
-  /*
-   *
-   * Show settings html
-   *
+  /**
+   * Show settings page
    */
-  public function show () {
+  public function show()
+  {
     $values = $this->configModel->getAll();
 
-    // Pre-generate secret if empty
     if (empty($values['jwt_secret'])) {
       $values['jwt_secret'] = $this->generateSecret();
     }
 
-    $this->response->html ($this->helper->layout->config ('JWTAuth:config/settings', [
+    $this->response->html($this->helper->layout->config('JWTAuth:config/settings', [
       'title' => t('JWT settings'),
       'values' => $values,
     ]));
   }
 
-
-  /*
-   *
+  /**
    * Save settings
-   *
    */
-  public function save () {
+  public function save()
+  {
+    $values = $this->request->getValues();
 
-    $values = $this->request->getValues ();
-
-    if (! isset ($values['jwt_enable']))
+    if (!isset($values['jwt_enable'])) {
       $values['jwt_enable'] = '';
+    }
 
-    // Generate secret automatically if jwt is enabled and secret is empty
-    if ($values['jwt_enable'] !== '' && $values['jwt_secret'] === '')
-      $values['jwt_secret'] = $this->generateSecret ();
+    if ($values['jwt_enable'] !== '' && $values['jwt_secret'] === '') {
+      $values['jwt_secret'] = $this->generateSecret();
+    }
 
-    $configUrl = $this->helper->url->to ('ConfigController', 'show', ['plugin' => 'JWTAuth']);
-    $redirect = $this->request->getStringParam ('redirect', $configUrl);
+    $configUrl = $this->helper->url->to('ConfigController', 'show', ['plugin' => 'JWTAuth']);
+    $redirect = $this->request->getStringParam('redirect', $configUrl);
 
-    if ($this->configModel->save ($values))
-      $this->flash->success (t('Settings saved successfully.'));
+    if ($this->configModel->save($values)) {
+      $this->flash->success(t('Settings saved successfully.'));
+    } else {
+      $this->flash->failure(t('Unable to save your settings.'));
+    }
 
-    else
-      $this->flash->failure (t('Unable to save your settings.'));
-
-    $this->response->redirect ($redirect);
+    $this->response->redirect($redirect);
   }
 }
