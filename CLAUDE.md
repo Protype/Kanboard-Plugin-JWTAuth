@@ -14,7 +14,17 @@ Kanboard-Plugin-JWTAuth is a Kanboard plugin that provides JWT (JSON Web Token) 
 composer install
 ```
 
-No build, test, or lint configuration exists in this project.
+### Run Tests
+
+```sh
+./vendor/bin/phpunit -c tests/phpunit.xml
+```
+
+Run specific test suite:
+```sh
+./vendor/bin/phpunit -c tests/phpunit.xml --testsuite "JWTAuth Unit Tests"
+./vendor/bin/phpunit -c tests/phpunit.xml --testsuite "JWTAuth Integration Tests"
+```
 
 ## Architecture
 
@@ -69,6 +79,6 @@ Stored in Kanboard's config model:
 ### Dependencies
 
 - PHP >= 7.2
-- `firebase/php-jwt` ^5.0
+- `firebase/php-jwt` ^6.0
 
 Note: The plugin manually loads `vendor/autoload.php` in both `JWTAuthProvider.php` and `ConfigController.php` since Kanboard doesn't use Composer autoloading for plugins.

@@ -95,10 +95,10 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
       $this->container['configModel']->save (['jwt_secret' => $key]);
     }
 
-    $appUrl = $this->container['configModel']->get ('application_url', $this->container['helper']->url->base ());
-    $issuer = $this->container['configModel']->get ('jwt_issuer', $appUrl);
-    $audience = $this->container['configModel']->get ('jwt_audience', $appUrl);
-    $expiration = $this->container['configModel']->get ('jwt_expiration', 259200); // 3 * 24 * 60 * 60 seconds
+    $appUrl = $this->container['configModel']->get ('application_url', '') ?: $this->container['helper']->url->base ();
+    $issuer = $this->container['configModel']->get ('jwt_issuer', '') ?: $appUrl;
+    $audience = $this->container['configModel']->get ('jwt_audience', '') ?: $appUrl;
+    $expiration = $this->container['configModel']->get ('jwt_expiration', '') ?: 259200; // 3 * 24 * 60 * 60 seconds
     $userSess = $this->container['userSession']->getAll ();
 
     $payload = array(
