@@ -83,6 +83,16 @@ curl -u "user:access_token" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+**Response (Token Rotation):**
+```json
+{
+  "result": {
+    "access_token":  "...",
+    "refresh_token": "..."
+  }
+}
+```
+
 ### Revoke Token
 
 ```sh
@@ -184,6 +194,16 @@ curl -u "user:access_token" -X POST \
 curl -u "user:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"refreshJWTToken","id":1,"params":["REFRESH_TOKEN"]}' \
   http://localhost/jsonrpc.php
+```
+
+**回應（Token Rotation）：**
+```json
+{
+  "result": {
+    "access_token":  "...",
+    "refresh_token": "..."
+  }
+}
 ```
 
 ### 撤銷 Token
