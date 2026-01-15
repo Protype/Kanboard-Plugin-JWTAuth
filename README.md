@@ -20,6 +20,7 @@ JWT authentication plugin for Kanboard API. Supports dual token mode (access + r
 
 | Method | Permission | Description |
 |--------|------------|-------------|
+| `getJWTPlugin` | Any user | Get plugin info and available methods |
 | `getJWTToken` | Any user | Get token(s) with basic auth |
 | `refreshJWTToken` | Any user | Exchange refresh token for new access token |
 | `revokeJWTToken` | Any user | Revoke own token only |
@@ -27,6 +28,26 @@ JWT authentication plugin for Kanboard API. Supports dual token mode (access + r
 | `revokeAllJWTTokens` | Admin | Revoke all tokens in system |
 
 ## Usage
+
+### Get Plugin Info
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getJWTPlugin","id":1}' \
+  http://localhost/jsonrpc.php
+```
+
+**Response:**
+```json
+{
+  "result": {
+    "name": "JWTAuth",
+    "version": "1.1.0",
+    "description": "Provide JWT authentication for Kanboard API",
+    "methods": [...]
+  }
+}
+```
 
 ### Get Token
 
@@ -102,6 +123,7 @@ Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）�
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
+| `getJWTPlugin` | 任何用戶 | 取得外掛資訊與可用方法清單 |
 | `getJWTToken` | 任何用戶 | 使用基本認證取得 Token |
 | `refreshJWTToken` | 任何用戶 | 用刷新 Token 換取新的存取 Token |
 | `revokeJWTToken` | 任何用戶 | 僅能撤銷自己的 Token |
@@ -109,6 +131,26 @@ Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）�
 | `revokeAllJWTTokens` | 管理員 | 撤銷系統所有 Token |
 
 ## 使用方式
+
+### 取得外掛資訊
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getJWTPlugin","id":1}' \
+  http://localhost/jsonrpc.php
+```
+
+**回應：**
+```json
+{
+  "result": {
+    "name": "JWTAuth",
+    "version": "1.1.0",
+    "description": "Provide JWT authentication for Kanboard API",
+    "methods": [...]
+  }
+}
+```
 
 ### 取得 Token
 
