@@ -29,7 +29,7 @@ class JWTAuthProviderTest extends Base
         $this->setConfig('jwt_secret', $this->testSecret);
         $this->setConfig('jwt_issuer', 'http://test.local/');
         $this->setConfig('jwt_audience', 'http://test.local/');
-        $this->setConfig('jwt_expiration', 3600); // 1 hour
+        $this->setConfig('jwt_access_expiration', 3600); // 1 hour
     }
 
     /**
@@ -42,18 +42,19 @@ class JWTAuthProviderTest extends Base
     }
 
     /**
-     * Test generateToken returns a valid JWT string
+     * Test generateToken returns valid JWT tokens
      */
     public function testGenerateTokenReturnsValidJWT(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
-        $this->assertIsString($token);
-        $this->assertNotEmpty($token);
+        $this->assertIsArray($tokens);
+        $this->assertArrayHasKey('access_token', $tokens);
+        $this->assertArrayHasKey('refresh_token', $tokens);
 
         // JWT has 3 parts separated by dots
-        $parts = explode('.', $token);
+        $parts = explode('.', $tokens['access_token']);
         $this->assertCount(3, $parts);
     }
 
@@ -68,10 +69,10 @@ class JWTAuthProviderTest extends Base
         ]);
 
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         // Decode and verify payload
-        $decoded = JWT::decode($token, new Key($this->testSecret, 'HS256'));
+        $decoded = JWT::decode($tokens['access_token'], new Key($this->testSecret, 'HS256'));
 
         $this->assertEquals(42, $decoded->data->id);
         $this->assertEquals('testuser', $decoded->data->username);
@@ -83,9 +84,9 @@ class JWTAuthProviderTest extends Base
     public function testGenerateTokenContainsCorrectClaims(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
-        $decoded = JWT::decode($token, new Key($this->testSecret, 'HS256'));
+        $decoded = JWT::decode($tokens['access_token'], new Key($this->testSecret, 'HS256'));
 
         $this->assertEquals('http://test.local/', $decoded->iss);
         $this->assertEquals('http://test.local/', $decoded->aud);
@@ -103,11 +104,11 @@ class JWTAuthProviderTest extends Base
         $this->setConfig('jwt_secret', '');
 
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         // Token should still be generated
-        $this->assertIsString($token);
-        $this->assertNotEmpty($token);
+        $this->assertIsArray($tokens);
+        $this->assertNotEmpty($tokens['access_token']);
 
         // Secret should now be set
         $newSecret = $this->getConfig('jwt_secret');
@@ -120,12 +121,12 @@ class JWTAuthProviderTest extends Base
     public function testVerifyTokenWithValidToken(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         // Set username to match the token
         $provider->setUsername('admin');
 
-        $result = $provider->verifyToken($token);
+        $result = $provider->verifyToken($tokens['access_token']);
 
         $this->assertIsArray($result);
         $this->assertEquals(1, $result['id']);
@@ -220,12 +221,12 @@ class JWTAuthProviderTest extends Base
     public function testVerifyTokenWithUsernameMismatch(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         // Set a different username than what's in the token
         $provider->setUsername('different_user');
 
-        $result = $provider->verifyToken($token);
+        $result = $provider->verifyToken($tokens['access_token']);
 
         $this->assertFalse($result);
     }
@@ -236,13 +237,13 @@ class JWTAuthProviderTest extends Base
     public function testVerifyTokenFailsWithoutSecret(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         // Clear the secret after token generation
         $this->setConfig('jwt_secret', '');
 
         $provider->setUsername('admin');
-        $result = $provider->verifyToken($token);
+        $result = $provider->verifyToken($tokens['access_token']);
 
         $this->assertFalse($result);
     }
@@ -253,10 +254,10 @@ class JWTAuthProviderTest extends Base
     public function testAuthenticateWithValidToken(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         $provider->setUsername('admin');
-        $provider->setPassword($token);
+        $provider->setPassword($tokens['access_token']);
 
         $result = $provider->authenticate();
 
@@ -311,10 +312,10 @@ class JWTAuthProviderTest extends Base
     public function testGetUserReturnsDatabaseUserProvider(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         $provider->setUsername('admin');
-        $provider->setPassword($token);
+        $provider->setPassword($tokens['access_token']);
         $provider->authenticate();
 
         $user = $provider->getUser();
@@ -344,12 +345,12 @@ class JWTAuthProviderTest extends Base
     public function testTokenUsesDefaultExpiration(): void
     {
         // Remove expiration config
-        $this->setConfig('jwt_expiration', '');
+        $this->setConfig('jwt_access_expiration', '');
 
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
-        $decoded = JWT::decode($token, new Key($this->testSecret, 'HS256'));
+        $decoded = JWT::decode($tokens['access_token'], new Key($this->testSecret, 'HS256'));
 
         // Default is 259200 seconds (3 days)
         $expectedExp = $decoded->iat + 259200;
@@ -366,9 +367,9 @@ class JWTAuthProviderTest extends Base
         $this->setConfig('application_url', 'http://myapp.example.com/');
 
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
-        $decoded = JWT::decode($token, new Key($this->testSecret, 'HS256'));
+        $decoded = JWT::decode($tokens['access_token'], new Key($this->testSecret, 'HS256'));
 
         $this->assertEquals('http://myapp.example.com/', $decoded->iss);
     }
@@ -379,19 +380,19 @@ class JWTAuthProviderTest extends Base
     public function testSettersStoreValuesCorrectly(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         // These should not throw exceptions
         $provider->setUsername('testuser');
-        $provider->setPassword($token);
+        $provider->setPassword($tokens['access_token']);
 
         // Verify by checking that authenticate works with matching username
         $this->setUserSession(['username' => 'testuser']);
         $newProvider = new JWTAuthProvider($this->container);
-        $newToken = $newProvider->generateToken();
+        $newTokens = $newProvider->generateToken();
 
         $newProvider->setUsername('testuser');
-        $newProvider->setPassword($newToken);
+        $newProvider->setPassword($newTokens['access_token']);
 
         $this->assertTrue($newProvider->authenticate());
     }

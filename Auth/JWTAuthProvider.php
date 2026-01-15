@@ -61,10 +61,10 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
 
   /*
    *
-   * Default access token expiration (1 hour)
+   * Default access token expiration (3 days)
    *
    */
-  const DEFAULT_ACCESS_EXPIRATION = 3600;
+  const DEFAULT_ACCESS_EXPIRATION = 259200;
 
 
   /*
@@ -73,14 +73,6 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
    *
    */
   const DEFAULT_REFRESH_EXPIRATION = 2592000;
-
-
-  /*
-   *
-   * Legacy mode expiration (3 days) for backward compatibility
-   *
-   */
-  const LEGACY_EXPIRATION = 259200;
 
 
   /*
@@ -149,18 +141,6 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
 
   /*
    *
-   * Check if dual token mode is enabled
-   *
-   */
-  private function isDualTokenMode () {
-    // Dual token mode is enabled if jwt_access_expiration is configured
-    $accessExp = $this->container['configModel']->get ('jwt_access_expiration', '');
-    return !empty ($accessExp);
-  }
-
-
-  /*
-   *
    * Generate unique JWT ID
    *
    */
@@ -209,29 +189,16 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
 
   /*
    *
-   * Generate JWT token(s)
+   * Generate JWT tokens
    *
-   * Returns array with access_token and refresh_token in dual mode,
-   * or string token in legacy mode for backward compatibility
+   * Returns array with access_token and refresh_token
    *
    */
   public function generateToken () {
-
-    if ($this->isDualTokenMode ()) {
-      return [
-        'access_token' => $this->generateAccessToken (),
-        'refresh_token' => $this->generateRefreshToken (),
-      ];
-    }
-
-    // Legacy mode: single token
-    $key = $this->getSecret ();
-    $expiration = $this->container['configModel']->get ('jwt_expiration', '') ?: self::LEGACY_EXPIRATION;
-
-    $payload = $this->getBaseClaims ();
-    $payload['exp'] = time() + (int) $expiration;
-
-    return JWT::encode ($payload, $key, 'HS256');
+    return [
+      'access_token' => $this->generateAccessToken (),
+      'refresh_token' => $this->generateRefreshToken (),
+    ];
   }
 
 
@@ -308,11 +275,6 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
   public function verifyToken ($token) {
 
     $decoded = $this->decodeToken ($token, 'access');
-
-    // If decoding failed, try without type check (legacy tokens)
-    if ($decoded === false) {
-      $decoded = $this->decodeToken ($token, null);
-    }
 
     if ($decoded === false)
       return false;

@@ -12,9 +12,8 @@ JWT authentication plugin for Kanboard API. Supports dual token mode (access + r
 | Setting | Description | Default |
 |---------|-------------|---------|
 | JWT Secret | Signing key (auto-generated if empty) | - |
-| JWT Expiration | Legacy token TTL (seconds) | 259200 (3 days) |
-| Access Token Expiration | Access token TTL (enables dual mode) | - |
-| Refresh Token Expiration | Refresh token TTL | 2592000 (30 days) |
+| Access Token Expiration | Access token TTL (seconds) | 259200 (3 days) |
+| Refresh Token Expiration | Refresh token TTL (seconds) | 2592000 (30 days) |
 
 ## API Methods
 
@@ -57,7 +56,7 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
-**Response (Dual Mode):**
+**Response:**
 ```json
 {
   "result": {
@@ -137,9 +136,8 @@ Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）�
 | 設定 | 說明 | 預設值 |
 |-----|------|-------|
 | JWT Secret | 簽名金鑰（空白時自動產生） | - |
-| JWT Expiration | 傳統模式 Token 有效期（秒） | 259200 (3 天) |
-| Access Token Expiration | 存取 Token 有效期（啟用雙 Token 模式） | - |
-| Refresh Token Expiration | 刷新 Token 有效期 | 2592000 (30 天) |
+| Access Token Expiration | 存取 Token 有效期（秒） | 259200 (3 天) |
+| Refresh Token Expiration | 刷新 Token 有效期（秒） | 2592000 (30 天) |
 
 ## API 方法
 
@@ -182,7 +180,7 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
-**回應（雙 Token 模式）：**
+**回應：**
 ```json
 {
   "result": {

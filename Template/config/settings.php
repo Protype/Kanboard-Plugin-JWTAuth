@@ -32,10 +32,17 @@
   </div>
 
   <div class="form-group">
-    <label for="jwt_expiration"><?= t('JWT Expiration (seconds)') ?></label>
-    <input type="number" name="jwt_expiration" id="jwt_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_expiration', '') ?>"
+    <label for="jwt_access_expiration"><?= t('Access Token Expiration (seconds)') ?></label>
+    <input type="number" name="jwt_access_expiration" id="jwt_access_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_access_expiration', '') ?>"
       <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
     <p class="form-help"><?= t('259200 seconds in default (3 days)') ?></p>
+  </div>
+
+  <div class="form-group">
+    <label for="jwt_refresh_expiration"><?= t('Refresh Token Expiration (seconds)') ?></label>
+    <input type="number" name="jwt_refresh_expiration" id="jwt_refresh_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_refresh_expiration', '') ?>"
+      <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
+    <p class="form-help"><?= t('2592000 seconds in default (30 days)') ?></p>
   </div>
 
   <div class="form-actions">

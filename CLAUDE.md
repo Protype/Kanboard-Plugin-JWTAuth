@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Kanboard-Plugin-JWTAuth is a Kanboard plugin that provides JWT (JSON Web Token) authentication for the Kanboard API. It supports both single token (legacy) and dual token (access + refresh) modes.
+Kanboard-Plugin-JWTAuth is a Kanboard plugin that provides JWT (JSON Web Token) authentication for the Kanboard API. It uses dual token mode (access + refresh tokens).
 
 ## Commands
 
@@ -52,10 +52,10 @@ Run specific test suite:
 
 ### Dual Token Mode
 
-When `jwt_access_expiration` is configured, the plugin operates in dual token mode:
+The plugin always operates in dual token mode:
 
-- **Access Token**: Short-lived (default 1 hour), used for API authentication
-- **Refresh Token**: Long-lived (default 30 days), used to obtain new access tokens
+- **Access Token**: Default 3 days, used for API authentication
+- **Refresh Token**: Default 30 days, used to obtain new access tokens
 
 Token structure includes:
 - `jti` - Unique token ID for revocation tracking
@@ -67,7 +67,7 @@ Token structure includes:
 | Method | Description |
 |--------|-------------|
 | `getJWTPlugin` | Get plugin info and available methods |
-| `getJWTToken` | Get access + refresh tokens (dual mode) or single token (legacy) |
+| `getJWTToken` | Get access + refresh tokens |
 | `refreshJWTToken` | Exchange refresh token for new tokens (token rotation) |
 | `revokeJWTToken` | Revoke a specific token |
 | `revokeUserJWTTokens` | Revoke all tokens for a specific user (admin only) |
@@ -107,11 +107,8 @@ Stored in Kanboard's config model:
 - `jwt_issuer` - Token issuer claim (defaults to application URL)
 - `jwt_audience` - Token audience claim (defaults to application URL)
 
-**Legacy Mode (single token):**
-- `jwt_expiration` - Token TTL in seconds (default: 259200 = 3 days)
-
-**Dual Token Mode:**
-- `jwt_access_expiration` - Access token TTL (default: 3600 = 1 hour)
+**Token Expiration:**
+- `jwt_access_expiration` - Access token TTL (default: 259200 = 3 days)
 - `jwt_refresh_expiration` - Refresh token TTL (default: 2592000 = 30 days)
 
 ### Dependencies

@@ -30,7 +30,7 @@ class JWTApiProcedureTest extends Base
         $this->setConfig('jwt_secret', $this->testSecret);
         $this->setConfig('jwt_issuer', 'http://kanboard.test/');
         $this->setConfig('jwt_audience', 'http://kanboard.test/');
-        $this->setConfig('jwt_expiration', 3600);
+        $this->setConfig('jwt_access_expiration', 3600);
     }
 
     /**
@@ -46,14 +46,15 @@ class JWTApiProcedureTest extends Base
 
         // Step 2: Generate token (simulates getJWTToken API call)
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
-        // Verify token is valid
-        $this->assertIsString($token);
-        $this->assertNotEmpty($token);
+        // Verify tokens are valid
+        $this->assertIsArray($tokens);
+        $this->assertArrayHasKey('access_token', $tokens);
+        $this->assertArrayHasKey('refresh_token', $tokens);
 
-        // Verify token contains correct data
-        $decoded = JWT::decode($token, new Key($this->testSecret, 'HS256'));
+        // Verify access token contains correct data
+        $decoded = JWT::decode($tokens['access_token'], new Key($this->testSecret, 'HS256'));
         $this->assertEquals(1, $decoded->data->id);
         $this->assertEquals('admin', $decoded->data->username);
     }
@@ -70,12 +71,12 @@ class JWTApiProcedureTest extends Base
         ]);
 
         $provider1 = new JWTAuthProvider($this->container);
-        $token = $provider1->generateToken();
+        $tokens = $provider1->generateToken();
 
         // Step 2: Use token for new request (simulates subsequent API call)
         $provider2 = new JWTAuthProvider($this->container);
         $provider2->setUsername('admin');
-        $provider2->setPassword($token);
+        $provider2->setPassword($tokens['access_token']);
 
         $authenticated = $provider2->authenticate();
 
@@ -130,12 +131,12 @@ class JWTApiProcedureTest extends Base
         ]);
 
         $provider1 = new JWTAuthProvider($this->container);
-        $token = $provider1->generateToken();
+        $tokens = $provider1->generateToken();
 
         // Try to use token as user 'bob'
         $provider2 = new JWTAuthProvider($this->container);
         $provider2->setUsername('bob');
-        $provider2->setPassword($token);
+        $provider2->setPassword($tokens['access_token']);
 
         $authenticated = $provider2->authenticate();
 
@@ -147,7 +148,7 @@ class JWTApiProcedureTest extends Base
      */
     public function testMultipleTokenGenerations(): void
     {
-        $tokens = [];
+        $accessTokens = [];
 
         for ($i = 1; $i <= 5; $i++) {
             $this->setUserSession([
@@ -156,15 +157,15 @@ class JWTApiProcedureTest extends Base
             ]);
 
             $provider = new JWTAuthProvider($this->container);
-            $token = $provider->generateToken();
+            $tokens = $provider->generateToken();
 
-            $this->assertNotContains($token, $tokens, 'Generated duplicate token');
-            $tokens[] = $token;
+            $this->assertNotContains($tokens['access_token'], $accessTokens, 'Generated duplicate token');
+            $accessTokens[] = $tokens['access_token'];
 
             // Verify each token can be authenticated
             $authProvider = new JWTAuthProvider($this->container);
             $authProvider->setUsername("user{$i}");
-            $authProvider->setPassword($token);
+            $authProvider->setPassword($tokens['access_token']);
 
             $this->assertTrue($authProvider->authenticate());
         }
@@ -176,12 +177,12 @@ class JWTApiProcedureTest extends Base
     public function testTokenWithCustomExpiration(): void
     {
         $customExpiration = 60; // 1 minute
-        $this->setConfig('jwt_expiration', $customExpiration);
+        $this->setConfig('jwt_access_expiration', $customExpiration);
 
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
-        $decoded = JWT::decode($token, new Key($this->testSecret, 'HS256'));
+        $decoded = JWT::decode($tokens['access_token'], new Key($this->testSecret, 'HS256'));
 
         // Verify expiration is approximately iat + custom expiration
         $this->assertEquals($decoded->iat + $customExpiration, $decoded->exp);
@@ -201,12 +202,12 @@ class JWTApiProcedureTest extends Base
 
             // Generate new token
             $generator = new JWTAuthProvider($this->container);
-            $token = $generator->generateToken();
+            $tokens = $generator->generateToken();
 
             // Authenticate with token
             $authenticator = new JWTAuthProvider($this->container);
             $authenticator->setUsername('admin');
-            $authenticator->setPassword($token);
+            $authenticator->setPassword($tokens['access_token']);
 
             $this->assertTrue(
                 $authenticator->authenticate(),
@@ -224,10 +225,10 @@ class JWTApiProcedureTest extends Base
     public function testTamperedTokenIsRejected(): void
     {
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         // Decode, modify, and re-encode with a different key (tampering)
-        $parts = explode('.', $token);
+        $parts = explode('.', $tokens['access_token']);
         $payload = json_decode(base64_decode($parts[1]), true);
         $payload['data']['id'] = 999; // Modify user ID
         $parts[1] = base64_encode(json_encode($payload));
@@ -250,7 +251,7 @@ class JWTApiProcedureTest extends Base
     {
         // First generate a valid token
         $provider = new JWTAuthProvider($this->container);
-        $token = $provider->generateToken();
+        $tokens = $provider->generateToken();
 
         // Disable JWT (this simulates the config being changed)
         $this->setConfig('jwt_enable', '0');
@@ -259,7 +260,7 @@ class JWTApiProcedureTest extends Base
         // This test documents current behavior
         $authProvider = new JWTAuthProvider($this->container);
         $authProvider->setUsername('admin');
-        $authProvider->setPassword($token);
+        $authProvider->setPassword($tokens['access_token']);
 
         // Note: The provider itself doesn't check jwt_enable
         // That check is done in Plugin.php when registering the provider

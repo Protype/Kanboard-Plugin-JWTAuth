@@ -5,13 +5,15 @@ $(document).ready(function() {
   var $jwtSecret = $form.find('#jwt_secret');
   var $jwtIssuer = $form.find('#jwt_issuer');
   var $jwtAudience = $form.find('#jwt_audience');
-  var $jwtExpiration = $form.find('#jwt_expiration');
+  var $jwtAccessExpiration = $form.find('#jwt_access_expiration');
+  var $jwtRefreshExpiration = $form.find('#jwt_refresh_expiration');
 
 
   $jwtEnable.on('change', function() {
     $jwtSecret.prop('readonly', !this.checked);
     $jwtIssuer.prop('readonly', !this.checked);
     $jwtAudience.prop('readonly', !this.checked);
-    $jwtExpiration.prop('readonly', !this.checked);
+    $jwtAccessExpiration.prop('readonly', !this.checked);
+    $jwtRefreshExpiration.prop('readonly', !this.checked);
   }).change();
 });
