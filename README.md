@@ -38,7 +38,12 @@ curl -u "user:password" -X POST \
 
 **Response (Dual Mode):**
 ```json
-{"result": {"access_token": "...", "refresh_token": "..."}}
+{
+  "result": {
+    "access_token":  "...",
+    "refresh_token": "..."
+  }
+}
 ```
 
 ### Use Token
@@ -115,7 +120,12 @@ curl -u "user:password" -X POST \
 
 **回應（雙 Token 模式）：**
 ```json
-{"result": {"access_token": "...", "refresh_token": "..."}}
+{
+  "result": {
+    "access_token":  "...",
+    "refresh_token": "..."
+  }
+}
 ```
 
 ### 使用 Token
