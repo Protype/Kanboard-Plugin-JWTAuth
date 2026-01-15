@@ -50,6 +50,10 @@ Run specific test suite:
 - `isRevoked($jti)` - Check if token is revoked
 - `revokeAllByUser($userId)` - Revoke all user tokens
 
+**Schema/** - Database schema migrations for token revocation table:
+- `Sqlite.php`, `Mysql.php`, `Postgres.php` - Creates `jwt_revoked_tokens` table
+- Schema is automatically loaded by Kanboard's plugin system on first use
+
 ### Dual Token Mode
 
 The plugin always operates in dual token mode:

@@ -249,21 +249,27 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
     if (!isset ($this->container['jwtRevokedTokenModel']))
       return false;
 
-    $model = $this->container['jwtRevokedTokenModel'];
+    try {
+      $model = $this->container['jwtRevokedTokenModel'];
 
-    // Check if specific token is revoked
-    if ($model->isRevoked ($decoded->jti))
-      return true;
-
-    // Check if all user tokens issued before a certain time are revoked
-    if (method_exists ($model, 'isUserRevoked')) {
-      $userId = $decoded->data->id ?? 0;
-      $issuedAt = $decoded->iat ?? 0;
-      if ($model->isUserRevoked ($userId, $issuedAt))
+      // Check if specific token is revoked
+      if ($model->isRevoked ($decoded->jti))
         return true;
-    }
 
-    return false;
+      // Check if all user tokens issued before a certain time are revoked
+      if (method_exists ($model, 'isUserRevoked')) {
+        $userId = $decoded->data->id ?? 0;
+        $issuedAt = $decoded->iat ?? 0;
+        if ($model->isUserRevoked ($userId, $issuedAt))
+          return true;
+      }
+
+      return false;
+    }
+    catch (\Exception $e) {
+      // Table might not exist yet, skip revocation check
+      return false;
+    }
   }
 
 
