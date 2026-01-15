@@ -667,12 +667,20 @@ class JWTAuthProviderTest extends Base
     }
 
     /**
-     * Test revokeAllTokens revokes all tokens for a user
+     * Test revokeUserTokens revokes all tokens for a specific user
      */
     public function testRevokeAllUserTokens(): void
     {
         $this->setConfig('jwt_access_expiration', 3600);
         $this->setConfig('jwt_refresh_expiration', 2592000);
+
+        // Ensure admin role for this test
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'admin',
+            'role' => 'app-admin',
+        ]);
+        $this->setupUserSession();
 
         $provider = new JWTAuthProvider($this->container);
 
@@ -680,8 +688,8 @@ class JWTAuthProviderTest extends Base
         $tokens1 = $provider->generateToken();
         $tokens2 = $provider->generateToken();
 
-        // Revoke all tokens for user
-        $result = $provider->revokeAllTokens(1);
+        // Revoke all tokens for user 1 (using admin method)
+        $result = $provider->revokeUserTokens(1);
 
         $this->assertTrue($result);
 
@@ -692,5 +700,139 @@ class JWTAuthProviderTest extends Base
 
         $provider->setPassword($tokens2['access_token']);
         $this->assertFalse($provider->authenticate());
+    }
+
+    // ========================================
+    // Permission Control Tests
+    // ========================================
+
+    /**
+     * Test revokeToken succeeds for own token
+     */
+    public function testRevokeTokenSucceedsForOwnToken(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'admin',
+            'role' => 'app-user', // Non-admin user
+        ]);
+
+        $provider = new JWTAuthProvider($this->container);
+        $tokens = $provider->generateToken();
+
+        // User can revoke their own token
+        $result = $provider->revokeToken($tokens['access_token']);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test revokeToken fails for other user's token
+     */
+    public function testRevokeTokenFailsForOtherUserToken(): void
+    {
+        $this->setConfig('jwt_access_expiration', 3600);
+
+        // Generate token for user 1
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'alice',
+            'role' => 'app-user',
+        ]);
+
+        $provider1 = new JWTAuthProvider($this->container);
+        $tokens = $provider1->generateToken();
+
+        // Switch to user 2 (non-admin)
+        $this->setUserSession([
+            'id' => 2,
+            'username' => 'bob',
+            'role' => 'app-user',
+        ]);
+
+        // Recreate provider with new session
+        $this->setupUserSession();
+        $provider2 = new JWTAuthProvider($this->container);
+
+        // User 2 should not be able to revoke user 1's token
+        $result = $provider2->revokeToken($tokens['access_token']);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test revokeUserTokens requires admin
+     */
+    public function testRevokeUserTokensRequiresAdmin(): void
+    {
+        $this->setUserSession([
+            'id' => 2,
+            'username' => 'bob',
+            'role' => 'app-user', // Non-admin
+        ]);
+        $this->setupUserSession();
+
+        $provider = new JWTAuthProvider($this->container);
+
+        // Non-admin cannot revoke other user's tokens
+        $result = $provider->revokeUserTokens(1);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test revokeUserTokens succeeds for admin
+     */
+    public function testRevokeUserTokensSucceedsForAdmin(): void
+    {
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'admin',
+            'role' => 'app-admin', // Admin
+        ]);
+        $this->setupUserSession();
+
+        $provider = new JWTAuthProvider($this->container);
+
+        // Admin can revoke any user's tokens
+        $result = $provider->revokeUserTokens(2);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test revokeAllTokens requires admin
+     */
+    public function testRevokeAllTokensRequiresAdmin(): void
+    {
+        $this->setUserSession([
+            'id' => 2,
+            'username' => 'bob',
+            'role' => 'app-user', // Non-admin
+        ]);
+        $this->setupUserSession();
+
+        $provider = new JWTAuthProvider($this->container);
+
+        // Non-admin cannot revoke all tokens
+        $result = $provider->revokeAllTokens();
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test revokeAllTokens succeeds for admin
+     */
+    public function testRevokeAllTokensSucceedsForAdmin(): void
+    {
+        $this->setUserSession([
+            'id' => 1,
+            'username' => 'admin',
+            'role' => 'app-admin', // Admin
+        ]);
+        $this->setupUserSession();
+
+        $provider = new JWTAuthProvider($this->container);
+
+        // Admin can revoke all tokens
+        $result = $provider->revokeAllTokens();
+        $this->assertTrue($result);
     }
 }

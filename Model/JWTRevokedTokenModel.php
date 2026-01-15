@@ -106,4 +106,41 @@ class JWTRevokedTokenModel
             ->eq('user_id', $userId)
             ->findAll();
     }
+
+    /**
+     * Revoke all tokens in the system
+     *
+     * Stores a global revocation marker
+     *
+     * @return bool Success
+     */
+    public function revokeAll(): bool
+    {
+        return $this->db->table(self::TABLE)->insert([
+            'jti' => '__global_revoke__',
+            'user_id' => 0,
+            'token_type' => 'all',
+            'revoked_at' => time(),
+            'expires_at' => time() + 31536000, // 1 year
+        ]);
+    }
+
+    /**
+     * Check if all tokens were revoked at a given time
+     *
+     * @param int $tokenIssuedAt Token issue timestamp
+     * @return bool True if token was issued before global revocation
+     */
+    public function isAllRevoked(int $tokenIssuedAt): bool
+    {
+        $record = $this->db->table(self::TABLE)
+            ->eq('jti', '__global_revoke__')
+            ->findOne();
+
+        if ($record && $record['revoked_at'] >= $tokenIssuedAt) {
+            return true;
+        }
+
+        return false;
+    }
 }

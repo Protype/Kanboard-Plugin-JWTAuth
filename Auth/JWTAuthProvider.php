@@ -365,7 +365,7 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
 
   /*
    *
-   * Revoke a specific token
+   * Revoke a specific token (own token only)
    *
    * @param string $token The token to revoke
    * @return bool Success
@@ -388,12 +388,18 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
       if (!isset ($this->container['jwtRevokedTokenModel']))
         return false;
 
+      // Check ownership: user can only revoke their own token
+      $tokenUserId = $decoded->data->id ?? 0;
+      $currentUserId = $this->container['userSession']->getId();
+
+      if ($tokenUserId !== $currentUserId)
+        return false;
+
       $model = $this->container['jwtRevokedTokenModel'];
-      $userId = $decoded->data->id ?? 0;
       $tokenType = $decoded->type ?? 'access';
       $expiresAt = $decoded->exp ?? time() + 3600;
 
-      return $model->add ($decoded->jti, $userId, $tokenType, $expiresAt);
+      return $model->add ($decoded->jti, $tokenUserId, $tokenType, $expiresAt);
     }
 
     catch (\Exception $e) {
@@ -404,25 +410,46 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
 
   /*
    *
-   * Revoke all tokens for a user
+   * Revoke all tokens for a specific user (admin only)
    *
-   * @param int $userId User ID (defaults to current user)
+   * @param int $userId User ID to revoke tokens for
    * @return bool Success
    *
    */
-  public function revokeAllTokens ($userId = null) {
+  public function revokeUserTokens ($userId) {
 
-    if ($userId === null) {
-      $userSess = $this->container['userSession']->getAll ();
-      $userId = $userSess['id'] ?? 0;
-    }
+    // Admin only
+    if (!$this->container['userSession']->isAdmin())
+      return false;
 
     if (!isset ($this->container['jwtRevokedTokenModel']))
       return false;
 
     $model = $this->container['jwtRevokedTokenModel'];
 
-    return $model->revokeAllByUser ($userId);
+    return $model->revokeAllByUser ((int) $userId);
+  }
+
+
+  /*
+   *
+   * Revoke all tokens in the system (admin only)
+   *
+   * @return bool Success
+   *
+   */
+  public function revokeAllTokens () {
+
+    // Admin only
+    if (!$this->container['userSession']->isAdmin())
+      return false;
+
+    if (!isset ($this->container['jwtRevokedTokenModel']))
+      return false;
+
+    $model = $this->container['jwtRevokedTokenModel'];
+
+    return $model->revokeAll ();
   }
 
 

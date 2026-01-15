@@ -49,10 +49,13 @@ class Plugin extends Base {
       // Register JWT refresh token API method
       $this->api->getProcedureHandler()->withClassAndMethod('refreshJWTToken', $jwtAuthProvider, 'refreshToken');
 
-      // Register JWT revoke token API method
+      // Register JWT revoke token API method (own token only)
       $this->api->getProcedureHandler()->withClassAndMethod('revokeJWTToken', $jwtAuthProvider, 'revokeToken');
 
-      // Register JWT revoke all tokens API method
+      // Register JWT revoke user tokens API method (admin only)
+      $this->api->getProcedureHandler()->withClassAndMethod('revokeUserJWTTokens', $jwtAuthProvider, 'revokeUserTokens');
+
+      // Register JWT revoke all tokens API method (admin only)
       $this->api->getProcedureHandler()->withClassAndMethod('revokeAllJWTTokens', $jwtAuthProvider, 'revokeAllTokens');
 
       // Register JWT authentication provider

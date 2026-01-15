@@ -386,7 +386,7 @@ class JWTApiProcedureTest extends Base
     }
 
     /**
-     * Test revoke all tokens for user
+     * Test revoke all tokens for user (admin only)
      */
     public function testRevokeAllTokensFlow(): void
     {
@@ -396,7 +396,9 @@ class JWTApiProcedureTest extends Base
         $this->setUserSession([
             'id' => 1,
             'username' => 'admin',
+            'role' => 'app-admin',
         ]);
+        $this->setupUserSession();
 
         $provider = new JWTAuthProvider($this->container);
 
@@ -405,8 +407,8 @@ class JWTApiProcedureTest extends Base
         $tokens2 = $provider->generateToken();
         $tokens3 = $provider->generateToken();
 
-        // Revoke all tokens for user
-        $this->assertTrue($provider->revokeAllTokens(1));
+        // Revoke all tokens for user 1 (admin method)
+        $this->assertTrue($provider->revokeUserTokens(1));
 
         // All access tokens should fail
         foreach ([$tokens1, $tokens2, $tokens3] as $tokens) {

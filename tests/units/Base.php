@@ -104,6 +104,11 @@ abstract class Base extends TestCase
                 return $userSessionData['id'];
             });
 
+        $userSession->method('isAdmin')
+            ->willReturnCallback(function () use (&$userSessionData) {
+                return ($userSessionData['role'] ?? '') === 'app-admin';
+            });
+
         $this->container['userSession'] = $userSession;
     }
 
@@ -172,6 +177,7 @@ interface MockUserSession
 {
     public function getAll(): array;
     public function getId();
+    public function isAdmin(): bool;
 }
 
 /**
@@ -245,5 +251,21 @@ class MockRevokedTokenModel
             }
         }
         return $count;
+    }
+
+    public function revokeAll(): bool
+    {
+        $this->storage["__all_revoked"] = [
+            'revoked_at' => time(),
+        ];
+        return true;
+    }
+
+    public function isAllRevoked(int $tokenIssuedAt): bool
+    {
+        if (isset($this->storage["__all_revoked"])) {
+            return $this->storage["__all_revoked"]['revoked_at'] >= $tokenIssuedAt;
+        }
+        return false;
     }
 }
