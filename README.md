@@ -109,6 +109,18 @@ curl -u "admin:access_token" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+## Troubleshooting
+
+### "Method not found" Error
+
+All JWT API methods require JWT authentication to be enabled first. If you see:
+
+```json
+{"error":{"code":-32601,"message":"Method not found"}}
+```
+
+**Solution:** Enable JWT in **Settings > JWT Auth** and save.
+
 ---
 
 # Kanboard-Plugin-JWTAuth (繁體中文)
@@ -221,3 +233,15 @@ curl -u "admin:access_token" -X POST \
   -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
   http://localhost/jsonrpc.php
 ```
+
+## 疑難排解
+
+### 「Method not found」錯誤
+
+所有 JWT API 方法都需要先啟用 JWT 認證。如果你看到：
+
+```json
+{"error":{"code":-32601,"message":"Method not found"}}
+```
+
+**解決方案：** 在 **設定 > JWT Auth** 中啟用並儲存。
