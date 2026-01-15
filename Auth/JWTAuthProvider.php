@@ -345,9 +345,10 @@ class JWTAuthProvider implements PasswordAuthenticationProviderInterface {
     // Set user session data from token for generating new tokens
     $this->setUserSessionFromToken ($decoded);
 
-    // Generate new access token
+    // Generate new tokens (token rotation)
     return [
       'access_token' => $this->generateAccessToken (),
+      'refresh_token' => $this->generateRefreshToken (),
     ];
   }
 
