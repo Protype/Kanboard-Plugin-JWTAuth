@@ -1,101 +1,117 @@
 # Kanboard-Plugin-JWTAuth
 
-This plugin provides JWT (JSON Web Token) authentication for the Kanboard API. It allows users to authenticate using JWT tokens, enhancing the security and flexibility of the authentication process.
+JWT authentication plugin for Kanboard API. Supports dual token mode (access + refresh) with token revocation.
 
 ## Installation
 
-1. Download the latest release of the plugin from the [releases page](https://github.com/Protype/Kanboard-Plugin-JWTAuth/releases).
-
-2. Extract the downloaded archive into the `plugins` directory of your Kanboard installation:
-    ```sh
-    cd /path/to/kanboard/plugins
-    unzip JWTAuth.zip
-    ```
-
-3. Navigating to the JWT settings page in Kanboard and enabling the JWTAuth plugin.
+1. Extract to `plugins/JWTAuth` directory
+2. Enable in **Settings > JWT Auth**
 
 ## Configuration
 
-- **Enable JWT Auth**: Check this box to enable JWT authentication.
+| Setting | Description | Default |
+|---------|-------------|---------|
+| JWT Secret | Signing key (auto-generated if empty) | - |
+| JWT Expiration | Legacy token TTL (seconds) | 259200 (3 days) |
+| Access Token Expiration | Access token TTL (enables dual mode) | - |
+| Refresh Token Expiration | Refresh token TTL | 2592000 (30 days) |
 
-- **JWT Secret**: Enter a secret key for signing the JWT tokens. Leave it empty to generate a random secret automatically.
+## API Methods
 
-- **JWT Issuer** (optional): Defines the entity issuing the JWT tokens. If left empty, the system will use the configured application URL. If no application URL is set, the current website URL will be used instead.
-
-- **JWT Audience** (optional): Specifies the intended recipients of the JWT tokens. If left empty, the system will follow the same logic as the Issuer.
-
-- **JWT Expiration** (optional): Enter the expiration time for the JWT tokens in seconds. The default is 259200 seconds (3 days).
+| Method | Description |
+|--------|-------------|
+| `getJWTToken` | Get token(s) with basic auth |
+| `refreshJWTToken` | Exchange refresh token for new access token |
+| `revokeJWTToken` | Revoke a specific token |
+| `revokeAllJWTTokens` | Revoke all user tokens |
 
 ## Usage
 
-### Obtaining a JWT Token
-
-To authenticate using JWT, first obtain a token by calling the `getJWTToken` API method. Use your Kanboard user credentials (e.g., the default `admin` / `admin`) to request the token.
-
-Example request using `curl`:
+### Get Token
 
 ```sh
-curl -X POST \
-  -u "admin:admin" \
-  -H "Content-Type: application/json" \
-  -d '{}' \
-  "http://your-kanboard-instance/jsonrpc.php"
+curl -u "admin:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getJWTToken","id":1}' \
+  http://localhost/jsonrpc.php
 ```
 
-Example JSON payload:
-
+**Response (Dual Mode):**
 ```json
-{
-  "jsonrpc": "2.0",
-  "method": "getJWTToken",
-  "id": 1
-}
+{"result": {"access_token": "...", "refresh_token": "..."}}
 ```
 
-Example response:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": "your-jwt-token"
-}
-```
-
-The `result` field contains the JWT token, which should be used for subsequent API requests.
-
-### Using the JWT Token for API Requests
-
-Once you have obtained the token, use it as the password field in API calls. Instead of sending a username and password, replace the password field with the JWT token.
-
-Example request to fetch the list of projects:
+### Use Token
 
 ```sh
-curl -X POST \
-  -u "admin:your-jwt-token" \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "getAllProjects", "id": 1}' \
-  "http://your-kanboard-instance/jsonrpc.php"
+curl -u "admin:ACCESS_TOKEN" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getAllProjects","id":1}' \
+  http://localhost/jsonrpc.php
 ```
 
-Example response:
+### Refresh Token
 
+```sh
+curl -u "admin:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"refreshJWTToken","id":1,"params":["REFRESH_TOKEN"]}' \
+  http://localhost/jsonrpc.php
+```
+
+---
+
+# Kanboard-Plugin-JWTAuth (繁體中文)
+
+Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）與 Token 撤銷功能。
+
+## 安裝
+
+1. 解壓縮至 `plugins/JWTAuth` 目錄
+2. 在 **設定 > JWT Auth** 中啟用
+
+## 設定選項
+
+| 設定 | 說明 | 預設值 |
+|-----|------|-------|
+| JWT Secret | 簽名金鑰（空白時自動產生） | - |
+| JWT Expiration | 傳統模式 Token 有效期（秒） | 259200 (3 天) |
+| Access Token Expiration | 存取 Token 有效期（啟用雙 Token 模式） | - |
+| Refresh Token Expiration | 刷新 Token 有效期 | 2592000 (30 天) |
+
+## API 方法
+
+| 方法 | 說明 |
+|-----|------|
+| `getJWTToken` | 使用基本認證取得 Token |
+| `refreshJWTToken` | 用刷新 Token 換取新的存取 Token |
+| `revokeJWTToken` | 撤銷指定 Token |
+| `revokeAllJWTTokens` | 撤銷使用者所有 Token |
+
+## 使用方式
+
+### 取得 Token
+
+```sh
+curl -u "admin:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getJWTToken","id":1}' \
+  http://localhost/jsonrpc.php
+```
+
+**回應（雙 Token 模式）：**
 ```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": [
-    {
-      "id": "1",
-      "name": "Project A"
-    },
-    {
-      "id": "2",
-      "name": "Project B"
-    }
-  ]
-}
+{"result": {"access_token": "...", "refresh_token": "..."}}
 ```
 
-With this approach, you no longer need to send your actual password with each API request, improving security while maintaining ease of use.
+### 使用 Token
 
+```sh
+curl -u "admin:ACCESS_TOKEN" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getAllProjects","id":1}' \
+  http://localhost/jsonrpc.php
+```
+
+### 刷新 Token
+
+```sh
+curl -u "admin:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"refreshJWTToken","id":1,"params":["REFRESH_TOKEN"]}' \
+  http://localhost/jsonrpc.php
+```
