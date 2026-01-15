@@ -87,7 +87,7 @@ class Plugin extends Base {
    *
    */
   public function getPluginVersion () {
-    return '2.0.0';
+    return '1.1.0';
   }
 
 
