@@ -6,6 +6,7 @@ use Kanboard\Core\Plugin\Base;
 use Kanboard\Plugin\KanproBridge\Feature\JWTAuth\Provider as JWTAuthProvider;
 use Kanboard\Plugin\KanproBridge\Feature\JWTAuth\RevokedTokenModel;
 use Kanboard\Plugin\KanproBridge\Feature\UserMetadata\Model as UserMetadataModel;
+use Kanboard\Plugin\KanproBridge\Feature\UserAvatar\Model as UserAvatarModel;
 
 /**
  * KanproBridge Plugin for Kanboard
@@ -37,6 +38,10 @@ class Plugin extends Base
       return new UserMetadataModel($c);
     };
 
+    $this->container['userAvatarModel'] = function ($c) {
+      return new UserAvatarModel($c);
+    };
+
     if ($this->configModel->get('jwt_enable', '') === '1') {
       $this->handleApiAuthHeader();
       $this->registerJWTAuthentication();
@@ -44,6 +49,10 @@ class Plugin extends Base
 
     if ($this->configModel->get('kanpro_user_metadata_enable', '') === '1') {
       $this->registerUserMetadataApi();
+    }
+
+    if ($this->configModel->get('kanpro_user_avatar_enable', '') === '1') {
+      $this->registerUserAvatarApi();
     }
   }
 
@@ -149,6 +158,19 @@ class Plugin extends Base
   }
 
   /**
+   * Register User Avatar API methods
+   */
+  private function registerUserAvatarApi()
+  {
+    $model = $this->container['userAvatarModel'];
+    $procedureHandler = $this->api->getProcedureHandler();
+
+    $procedureHandler->withClassAndMethod('uploadUserAvatar', $model, 'upload');
+    $procedureHandler->withClassAndMethod('getUserAvatar', $model, 'get');
+    $procedureHandler->withClassAndMethod('removeUserAvatar', $model, 'remove');
+  }
+
+  /**
    * Get plugin name
    */
   public function getPluginName()
@@ -195,6 +217,7 @@ class Plugin extends Base
   {
     $jwtEnabled = $this->configModel->get('jwt_enable', '') === '1';
     $userMetadataEnabled = $this->configModel->get('kanpro_user_metadata_enable', '') === '1';
+    $userAvatarEnabled = $this->configModel->get('kanpro_user_avatar_enable', '') === '1';
 
     return [
       'name' => $this->getPluginName(),
@@ -219,6 +242,14 @@ class Plugin extends Base
             ['name' => 'getUserMetadataByName', 'description' => 'Get a specific metadata value by name'],
             ['name' => 'saveUserMetadata', 'description' => 'Save metadata for a user'],
             ['name' => 'removeUserMetadata', 'description' => 'Remove a specific metadata entry'],
+          ],
+        ],
+        'user_avatar' => [
+          'enabled' => $userAvatarEnabled,
+          'methods' => [
+            ['name' => 'uploadUserAvatar', 'description' => 'Upload avatar image (base64)'],
+            ['name' => 'getUserAvatar', 'description' => 'Get avatar image (base64)'],
+            ['name' => 'removeUserAvatar', 'description' => 'Remove avatar image'],
           ],
         ],
       ],

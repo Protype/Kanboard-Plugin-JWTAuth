@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 KanproBridge is a multi-functional Kanboard plugin that provides:
 - **JWT Authentication** for the Kanboard API (dual token mode: access + refresh tokens)
 - **User Metadata** storage for custom key-value pairs per user
+- **User Avatar** upload and retrieval via API
 
 ## Commands
 
@@ -38,8 +39,10 @@ KanproBridge/
 │   ├── JWTAuth/
 │   │   ├── Provider.php           # JWT authentication provider
 │   │   └── RevokedTokenModel.php  # Token revocation storage
-│   └── UserMetadata/
-│       └── Model.php              # User metadata storage
+│   ├── UserMetadata/
+│   │   └── Model.php              # User metadata storage
+│   └── UserAvatar/
+│       └── Model.php              # User avatar API
 ├── Controller/
 │   └── ConfigController.php
 ├── Schema/
@@ -63,6 +66,7 @@ KanproBridge/
 - Hooks templates and assets into Kanboard's layout
 - Registers `JWTAuthProvider` when JWT is enabled
 - Registers User Metadata API when enabled
+- Registers User Avatar API when enabled
 - Exposes JSON-RPC API methods
 
 **Feature/JWTAuth/Provider.php** - Implements `PasswordAuthenticationProviderInterface`:
@@ -86,6 +90,11 @@ KanproBridge/
 - `save($userId, $values)` - Save metadata key-value pairs
 - `remove($userId, $name)` - Remove specific metadata entry
 
+**Feature/UserAvatar/Model.php** - User avatar API:
+- `upload($userId, $imageData)` - Upload avatar (base64 encoded)
+- `get($userId)` - Get avatar (base64 encoded)
+- `remove($userId)` - Remove avatar
+
 **Schema/** - Database schema migrations:
 - `version_1`: Creates `jwt_revoked_tokens` table
 - `version_2`: Creates `kanpro_user_metadata` table
@@ -102,10 +111,10 @@ Token structure includes:
 - `type` - Token type ('access' or 'refresh')
 - Standard JWT claims (iss, aud, iat, nbf, exp, data)
 
-### User Metadata Permissions
+### User Metadata / Avatar Permissions
 
-- Users can only access their own metadata
-- Administrators can access any user's metadata
+- Users can only access their own data
+- Administrators can access any user's data
 - All operations return `false` or `null` if access is denied
 
 ### API Methods
@@ -120,13 +129,20 @@ Token structure includes:
 | `revokeUserJWTTokens` | Revoke all tokens for a user | Admin only |
 | `revokeAllJWTTokens` | Revoke all tokens in system | Admin only |
 
-#### User Metadata (new)
+#### User Metadata
 | Method | Parameters | Permission |
 |--------|------------|------------|
 | `getUserMetadata` | `userId` | Self or admin |
 | `getUserMetadataByName` | `userId`, `name`, `default` | Self or admin |
 | `saveUserMetadata` | `userId`, `values` | Self or admin |
 | `removeUserMetadata` | `userId`, `name` | Self or admin |
+
+#### User Avatar
+| Method | Parameters | Permission |
+|--------|------------|------------|
+| `uploadUserAvatar` | `userId`, `imageData` (base64) | Self or admin |
+| `getUserAvatar` | `userId` | Self or admin |
+| `removeUserAvatar` | `userId` | Self or admin |
 
 ### API Testing
 
@@ -170,6 +186,21 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "removeUserMetadata", "params": {"userId": 1, "name": "theme"}, "id": 1}' \
   "http://localhost/jsonrpc.php"
+
+# User Avatar: Upload (base64 encoded image)
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "uploadUserAvatar", "params": {"userId": 1, "imageData": "BASE64_ENCODED_IMAGE"}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# User Avatar: Get
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getUserAvatar", "params": {"userId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# User Avatar: Remove
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "removeUserAvatar", "params": {"userId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
 ```
 
 ### Configuration Keys
@@ -186,6 +217,9 @@ Stored in Kanboard's config model:
 
 **User Metadata Settings:**
 - `kanpro_user_metadata_enable` - Enable/disable User Metadata API
+
+**User Avatar Settings:**
+- `kanpro_user_avatar_enable` - Enable/disable User Avatar API
 
 ### Dependencies
 

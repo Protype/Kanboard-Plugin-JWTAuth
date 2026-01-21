@@ -62,6 +62,19 @@
     </div>
   </fieldset>
 
+  <!-- User Avatar Section -->
+  <fieldset>
+    <legend><?= t('User Avatar') ?></legend>
+
+    <div class="form-group">
+      <label for="kanpro_user_avatar_enable">
+        <input type="checkbox" name="kanpro_user_avatar_enable" value="1" id="kanpro_user_avatar_enable" class="form-control" <?= ($this->task->configModel->get('kanpro_user_avatar_enable', '') === '1') ? 'checked' : '' ?>>
+        <?= t('Enable User Avatar API') ?>
+      </label>
+      <p class="form-help"><?= t('Allows uploading and managing user avatars via API. Accepts base64 encoded images (PNG, JPG, GIF).') ?></p>
+    </div>
+  </fieldset>
+
   <div class="form-actions">
     <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
   </div>

@@ -1,11 +1,12 @@
 # KanproBridge
 
-Multi-functional Kanboard plugin providing JWT authentication and User Metadata storage.
+Multi-functional Kanboard plugin providing JWT authentication, User Metadata storage, and User Avatar API.
 
 ## Features
 
 - **JWT Authentication**: Dual token mode (access + refresh) with token revocation
 - **User Metadata**: Custom key-value storage per user
+- **User Avatar**: Upload and retrieve avatars via API
 
 ## Installation
 
@@ -28,6 +29,12 @@ Multi-functional Kanboard plugin providing JWT authentication and User Metadata 
 |---------|-------------|---------|
 | Enable User Metadata | Enable/disable User Metadata API | Disabled |
 
+### User Avatar Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable User Avatar | Enable/disable User Avatar API | Disabled |
+
 ## API Methods
 
 ### JWT Authentication
@@ -49,6 +56,14 @@ Multi-functional Kanboard plugin providing JWT authentication and User Metadata 
 | `getUserMetadataByName` | Self or Admin | Get a specific metadata value |
 | `saveUserMetadata` | Self or Admin | Save metadata key-value pairs |
 | `removeUserMetadata` | Self or Admin | Remove a metadata entry |
+
+### User Avatar
+
+| Method | Permission | Description |
+|--------|------------|-------------|
+| `uploadUserAvatar` | Self or Admin | Upload avatar (base64 PNG/JPG/GIF) |
+| `getUserAvatar` | Self or Admin | Get avatar (base64) |
+| `removeUserAvatar` | Self or Admin | Remove avatar |
 
 ## Usage
 
@@ -140,6 +155,22 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+### Upload User Avatar
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"uploadUserAvatar","id":1,"params":{"userId":1,"imageData":"BASE64_IMAGE"}}' \
+  http://localhost/jsonrpc.php
+```
+
+### Get User Avatar
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getUserAvatar","id":1,"params":{"userId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
 ## Troubleshooting
 
 ### "Method not found" Error
@@ -156,12 +187,13 @@ API methods require their feature to be enabled first. If you see:
 
 # KanproBridge (繁體中文)
 
-多功能 Kanboard 外掛，提供 JWT 認證與使用者 Metadata 儲存。
+多功能 Kanboard 外掛，提供 JWT 認證、使用者 Metadata 儲存與頭像 API。
 
 ## 功能
 
 - **JWT 認證**：雙 Token 模式（存取 + 刷新）與 Token 撤銷
 - **User Metadata**：使用者自訂鍵值對儲存
+- **User Avatar**：透過 API 上傳與取得頭像
 
 ## 安裝
 
@@ -184,6 +216,12 @@ API methods require their feature to be enabled first. If you see:
 |-----|------|-------|
 | 啟用 User Metadata | 啟用/停用 User Metadata API | 停用 |
 
+### User Avatar 設定
+
+| 設定 | 說明 | 預設值 |
+|-----|------|-------|
+| 啟用 User Avatar | 啟用/停用 User Avatar API | 停用 |
+
 ## API 方法
 
 ### JWT 認證
@@ -205,6 +243,14 @@ API methods require their feature to be enabled first. If you see:
 | `getUserMetadataByName` | 本人或管理員 | 取得指定 Metadata 值 |
 | `saveUserMetadata` | 本人或管理員 | 儲存 Metadata 鍵值對 |
 | `removeUserMetadata` | 本人或管理員 | 移除 Metadata 項目 |
+
+### User Avatar
+
+| 方法 | 權限 | 說明 |
+|-----|------|-----|
+| `uploadUserAvatar` | 本人或管理員 | 上傳頭像（base64 PNG/JPG/GIF） |
+| `getUserAvatar` | 本人或管理員 | 取得頭像（base64） |
+| `removeUserAvatar` | 本人或管理員 | 移除頭像 |
 
 ## 使用方式
 
@@ -293,6 +339,22 @@ curl -u "user:password" -X POST \
 ```sh
 curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"getUserMetadata","id":1,"params":{"userId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+### 上傳 User Avatar
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"uploadUserAvatar","id":1,"params":{"userId":1,"imageData":"BASE64_IMAGE"}}' \
+  http://localhost/jsonrpc.php
+```
+
+### 取得 User Avatar
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getUserAvatar","id":1,"params":{"userId":1}}' \
   http://localhost/jsonrpc.php
 ```
 
