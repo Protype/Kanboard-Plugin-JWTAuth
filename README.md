@@ -1,13 +1,20 @@
-# Kanboard-Plugin-JWTAuth
+# KanproBridge
 
-JWT authentication plugin for Kanboard API. Supports dual token mode (access + refresh) with token revocation.
+Multi-functional Kanboard plugin providing JWT authentication and User Metadata storage.
+
+## Features
+
+- **JWT Authentication**: Dual token mode (access + refresh) with token revocation
+- **User Metadata**: Custom key-value storage per user
 
 ## Installation
 
-1. Extract to `plugins/JWTAuth` directory
-2. Enable in **Settings > JWT Auth**
+1. Extract to `plugins/KanproBridge` directory
+2. Enable features in **Settings > KanproBridge**
 
 ## Configuration
+
+### JWT Settings
 
 | Setting | Description | Default |
 |---------|-------------|---------|
@@ -15,7 +22,15 @@ JWT authentication plugin for Kanboard API. Supports dual token mode (access + r
 | Access Token Expiration | Access token TTL (seconds) | 259200 (3 days) |
 | Refresh Token Expiration | Refresh token TTL (seconds) | 2592000 (30 days) |
 
+### User Metadata Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable User Metadata | Enable/disable User Metadata API | Disabled |
+
 ## API Methods
+
+### JWT Authentication
 
 | Method | Permission | Description |
 |--------|------------|-------------|
@@ -25,6 +40,15 @@ JWT authentication plugin for Kanboard API. Supports dual token mode (access + r
 | `revokeJWTToken` | Any user | Revoke own token only |
 | `revokeUserJWTTokens` | Admin | Revoke all tokens for a specific user |
 | `revokeAllJWTTokens` | Admin | Revoke all tokens in system |
+
+### User Metadata
+
+| Method | Permission | Description |
+|--------|------------|-------------|
+| `getUserMetadata` | Self or Admin | Get all metadata for a user |
+| `getUserMetadataByName` | Self or Admin | Get a specific metadata value |
+| `saveUserMetadata` | Self or Admin | Save metadata key-value pairs |
+| `removeUserMetadata` | Self or Admin | Remove a metadata entry |
 
 ## Usage
 
@@ -40,10 +64,10 @@ curl -u "user:password" -X POST \
 ```json
 {
   "result": {
-    "name": "JWTAuth",
-    "version": "1.3.0",
-    "description": "Provide JWT authentication for Kanboard API",
-    "methods": [...]
+    "name": "KanproBridge",
+    "version": "2.0.0",
+    "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
+    "features": {...}
   }
 }
 ```
@@ -100,11 +124,19 @@ curl -u "user:access_token" -X POST \
   http://localhost/jsonrpc.php
 ```
 
-### Revoke User Tokens (Admin)
+### Save User Metadata
 
 ```sh
-curl -u "admin:access_token" -X POST \
-  -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"saveUserMetadata","id":1,"params":{"userId":1,"values":{"theme":"dark"}}}' \
+  http://localhost/jsonrpc.php
+```
+
+### Get User Metadata
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getUserMetadata","id":1,"params":{"userId":1}}' \
   http://localhost/jsonrpc.php
 ```
 
@@ -112,26 +144,33 @@ curl -u "admin:access_token" -X POST \
 
 ### "Method not found" Error
 
-All JWT API methods require JWT authentication to be enabled first. If you see:
+API methods require their feature to be enabled first. If you see:
 
 ```json
 {"error":{"code":-32601,"message":"Method not found"}}
 ```
 
-**Solution:** Enable JWT in **Settings > JWT Auth** and save.
+**Solution:** Enable the feature in **Settings > KanproBridge** and save.
 
 ---
 
-# Kanboard-Plugin-JWTAuth (繁體中文)
+# KanproBridge (繁體中文)
 
-Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）與 Token 撤銷功能。
+多功能 Kanboard 外掛，提供 JWT 認證與使用者 Metadata 儲存。
+
+## 功能
+
+- **JWT 認證**：雙 Token 模式（存取 + 刷新）與 Token 撤銷
+- **User Metadata**：使用者自訂鍵值對儲存
 
 ## 安裝
 
-1. 解壓縮至 `plugins/JWTAuth` 目錄
-2. 在 **設定 > JWT Auth** 中啟用
+1. 解壓縮至 `plugins/KanproBridge` 目錄
+2. 在 **設定 > KanproBridge** 中啟用功能
 
 ## 設定選項
+
+### JWT 設定
 
 | 設定 | 說明 | 預設值 |
 |-----|------|-------|
@@ -139,7 +178,15 @@ Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）�
 | Access Token Expiration | 存取 Token 有效期（秒） | 259200 (3 天) |
 | Refresh Token Expiration | 刷新 Token 有效期（秒） | 2592000 (30 天) |
 
+### User Metadata 設定
+
+| 設定 | 說明 | 預設值 |
+|-----|------|-------|
+| 啟用 User Metadata | 啟用/停用 User Metadata API | 停用 |
+
 ## API 方法
+
+### JWT 認證
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
@@ -149,6 +196,15 @@ Kanboard API 的 JWT 認證外掛。支援雙 Token 模式（存取 + 刷新）�
 | `revokeJWTToken` | 任何用戶 | 僅能撤銷自己的 Token |
 | `revokeUserJWTTokens` | 管理員 | 撤銷指定用戶的所有 Token |
 | `revokeAllJWTTokens` | 管理員 | 撤銷系統所有 Token |
+
+### User Metadata
+
+| 方法 | 權限 | 說明 |
+|-----|------|-----|
+| `getUserMetadata` | 本人或管理員 | 取得使用者所有 Metadata |
+| `getUserMetadataByName` | 本人或管理員 | 取得指定 Metadata 值 |
+| `saveUserMetadata` | 本人或管理員 | 儲存 Metadata 鍵值對 |
+| `removeUserMetadata` | 本人或管理員 | 移除 Metadata 項目 |
 
 ## 使用方式
 
@@ -164,10 +220,10 @@ curl -u "user:password" -X POST \
 ```json
 {
   "result": {
-    "name": "JWTAuth",
-    "version": "1.3.0",
-    "description": "Provide JWT authentication for Kanboard API",
-    "methods": [...]
+    "name": "KanproBridge",
+    "version": "2.0.0",
+    "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
+    "features": {...}
   }
 }
 ```
@@ -224,11 +280,19 @@ curl -u "user:access_token" -X POST \
   http://localhost/jsonrpc.php
 ```
 
-### 撤銷用戶 Token（管理員）
+### 儲存 User Metadata
 
 ```sh
-curl -u "admin:access_token" -X POST \
-  -d '{"jsonrpc":"2.0","method":"revokeUserJWTTokens","id":1,"params":[USER_ID]}' \
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"saveUserMetadata","id":1,"params":{"userId":1,"values":{"theme":"dark"}}}' \
+  http://localhost/jsonrpc.php
+```
+
+### 取得 User Metadata
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getUserMetadata","id":1,"params":{"userId":1}}' \
   http://localhost/jsonrpc.php
 ```
 
@@ -236,10 +300,10 @@ curl -u "admin:access_token" -X POST \
 
 ### 「Method not found」錯誤
 
-所有 JWT API 方法都需要先啟用 JWT 認證。如果你看到：
+API 方法需要先啟用對應功能。如果你看到：
 
 ```json
 {"error":{"code":-32601,"message":"Method not found"}}
 ```
 
-**解決方案：** 在 **設定 > JWT Auth** 中啟用並儲存。
+**解決方案：** 在 **設定 > KanproBridge** 中啟用功能並儲存。
