@@ -10,3 +10,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.iml
+
+# Ignore test cache
+tests/.phpunit.result.cache
