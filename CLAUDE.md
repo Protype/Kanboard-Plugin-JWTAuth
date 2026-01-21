@@ -113,7 +113,7 @@ Token structure includes:
 #### JWT Auth (original names preserved)
 | Method | Description | Permission |
 |--------|-------------|------------|
-| `getJWTPlugin` | Get plugin info and available methods | Any user |
+| `getKanproBridgePlugin` | Get plugin info and available methods | Any user |
 | `getJWTToken` | Get access + refresh tokens | Any user |
 | `refreshJWTToken` | Exchange refresh token for new tokens | Any user |
 | `revokeJWTToken` | Revoke a specific token | Own token only |
