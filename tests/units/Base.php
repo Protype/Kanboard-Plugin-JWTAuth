@@ -49,6 +49,11 @@ abstract class Base extends TestCase
     protected $avatarStorage = [];
 
     /**
+     * @var array Mock user storage
+     */
+    protected $userStorage = [];
+
+    /**
      * Set up test environment
      */
     protected function setUp(): void
@@ -60,6 +65,7 @@ abstract class Base extends TestCase
         $this->revokedTokensStorage = [];
         $this->userMetadataStorage = [];
         $this->avatarStorage = [];
+        $this->userStorage = [];
 
         $this->setupConfigModel();
         $this->setupUserSession();
@@ -68,6 +74,7 @@ abstract class Base extends TestCase
         $this->setupDatabase();
         $this->setupAvatarFileModel();
         $this->setupObjectStorage();
+        $this->setupUserModel();
     }
 
     /**
@@ -181,6 +188,29 @@ abstract class Base extends TestCase
 
         $objectStorage = new MockObjectStorage($avatarStorage);
         $this->container['objectStorage'] = $objectStorage;
+    }
+
+    /**
+     * Set up mock user model
+     */
+    protected function setupUserModel(): void
+    {
+        $userStorage = &$this->userStorage;
+
+        $userModel = new MockUserModel($userStorage);
+        $this->container['userModel'] = $userModel;
+    }
+
+    /**
+     * Add a user to storage for testing
+     */
+    protected function addUser(int $id, string $username, string $password): void
+    {
+        $this->userStorage[$id] = [
+            'id' => $id,
+            'username' => $username,
+            'password' => password_hash($password, PASSWORD_BCRYPT),
+        ];
     }
 
     /**
@@ -496,5 +526,39 @@ class MockObjectStorage
             }
         }
         throw new \Exception("File not found: {$filename}");
+    }
+}
+
+/**
+ * Mock User Model for testing
+ */
+class MockUserModel
+{
+    private $storage;
+
+    public function __construct(array &$storage)
+    {
+        $this->storage = &$storage;
+    }
+
+    public function getById(int $userId): ?array
+    {
+        return $this->storage[$userId] ?? null;
+    }
+
+    public function update(array $values): bool
+    {
+        $id = $values['id'] ?? null;
+        if ($id === null || !isset($this->storage[$id])) {
+            return false;
+        }
+
+        // Hash password if provided
+        if (isset($values['password']) && !empty($values['password'])) {
+            $values['password'] = password_hash($values['password'], PASSWORD_BCRYPT);
+        }
+
+        $this->storage[$id] = array_merge($this->storage[$id], $values);
+        return true;
     }
 }

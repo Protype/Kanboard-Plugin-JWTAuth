@@ -1,12 +1,13 @@
 # KanproBridge
 
-Multi-functional Kanboard plugin providing JWT authentication, User Metadata storage, and User Avatar API.
+Multi-functional Kanboard plugin providing JWT authentication, User Metadata, User Avatar, and User Password API.
 
 ## Features
 
 - **JWT Authentication**: Dual token mode (access + refresh) with token revocation
 - **User Metadata**: Custom key-value storage per user
 - **User Avatar**: Upload and retrieve avatars via API
+- **User Password**: Change and reset passwords via API
 
 ## Installation
 
@@ -34,6 +35,12 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata sto
 | Setting | Description | Default |
 |---------|-------------|---------|
 | Enable User Avatar | Enable/disable User Avatar API | Disabled |
+
+### User Password Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable User Password | Enable/disable User Password API | Disabled |
 
 ## API Methods
 
@@ -65,6 +72,13 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata sto
 | `getUserAvatar` | Self or Admin | Get avatar (base64) |
 | `removeUserAvatar` | Self or Admin | Remove avatar |
 
+### User Password
+
+| Method | Permission | Description |
+|--------|------------|-------------|
+| `changeUserPassword` | Self only | Change own password (requires current) |
+| `resetUserPassword` | Admin only | Reset any user's password |
+
 ## Usage
 
 ### Get Plugin Info
@@ -80,7 +94,7 @@ curl -u "user:password" -X POST \
 {
   "result": {
     "name": "KanproBridge",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
     "features": {...}
   }
@@ -171,6 +185,22 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+### Change User Password
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"changeUserPassword","id":1,"params":{"currentPassword":"oldpass","newPassword":"newpass"}}' \
+  http://localhost/jsonrpc.php
+```
+
+### Reset User Password (Admin)
+
+```sh
+curl -u "admin:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"resetUserPassword","id":1,"params":{"userId":1,"newPassword":"resetpass"}}' \
+  http://localhost/jsonrpc.php
+```
+
 ## Troubleshooting
 
 ### "Method not found" Error
@@ -187,13 +217,14 @@ API methods require their feature to be enabled first. If you see:
 
 # KanproBridge (繁體中文)
 
-多功能 Kanboard 外掛，提供 JWT 認證、使用者 Metadata 儲存與頭像 API。
+多功能 Kanboard 外掛，提供 JWT 認證、使用者 Metadata、頭像與密碼 API。
 
 ## 功能
 
 - **JWT 認證**：雙 Token 模式（存取 + 刷新）與 Token 撤銷
 - **User Metadata**：使用者自訂鍵值對儲存
 - **User Avatar**：透過 API 上傳與取得頭像
+- **User Password**：透過 API 更改與重設密碼
 
 ## 安裝
 
@@ -221,6 +252,12 @@ API methods require their feature to be enabled first. If you see:
 | 設定 | 說明 | 預設值 |
 |-----|------|-------|
 | 啟用 User Avatar | 啟用/停用 User Avatar API | 停用 |
+
+### User Password 設定
+
+| 設定 | 說明 | 預設值 |
+|-----|------|-------|
+| 啟用 User Password | 啟用/停用 User Password API | 停用 |
 
 ## API 方法
 
@@ -252,6 +289,13 @@ API methods require their feature to be enabled first. If you see:
 | `getUserAvatar` | 本人或管理員 | 取得頭像（base64） |
 | `removeUserAvatar` | 本人或管理員 | 移除頭像 |
 
+### User Password
+
+| 方法 | 權限 | 說明 |
+|-----|------|-----|
+| `changeUserPassword` | 僅限本人 | 更改自己密碼（需驗證舊密碼） |
+| `resetUserPassword` | 僅限管理員 | 重設任何使用者密碼 |
+
 ## 使用方式
 
 ### 取得外掛資訊
@@ -267,7 +311,7 @@ curl -u "user:password" -X POST \
 {
   "result": {
     "name": "KanproBridge",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
     "features": {...}
   }
@@ -355,6 +399,22 @@ curl -u "user:password" -X POST \
 ```sh
 curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"getUserAvatar","id":1,"params":{"userId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+### 更改密碼
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"changeUserPassword","id":1,"params":{"currentPassword":"oldpass","newPassword":"newpass"}}' \
+  http://localhost/jsonrpc.php
+```
+
+### 重設密碼（管理員）
+
+```sh
+curl -u "admin:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"resetUserPassword","id":1,"params":{"userId":1,"newPassword":"resetpass"}}' \
   http://localhost/jsonrpc.php
 ```
 

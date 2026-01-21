@@ -75,6 +75,19 @@
     </div>
   </fieldset>
 
+  <!-- User Password Section -->
+  <fieldset>
+    <legend><?= t('User Password') ?></legend>
+
+    <div class="form-group">
+      <label for="kanpro_user_password_enable">
+        <input type="checkbox" name="kanpro_user_password_enable" value="1" id="kanpro_user_password_enable" class="form-control" <?= ($this->task->configModel->get('kanpro_user_password_enable', '') === '1') ? 'checked' : '' ?>>
+        <?= t('Enable User Password API') ?>
+      </label>
+      <p class="form-help"><?= t('User: change own password (requires current). Admin: reset any password.') ?></p>
+    </div>
+  </fieldset>
+
   <div class="form-actions">
     <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
   </div>

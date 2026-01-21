@@ -7,6 +7,7 @@ use Kanboard\Plugin\KanproBridge\Feature\JWTAuth\Provider as JWTAuthProvider;
 use Kanboard\Plugin\KanproBridge\Feature\JWTAuth\RevokedTokenModel;
 use Kanboard\Plugin\KanproBridge\Feature\UserMetadata\Model as UserMetadataModel;
 use Kanboard\Plugin\KanproBridge\Feature\UserAvatar\Model as UserAvatarModel;
+use Kanboard\Plugin\KanproBridge\Feature\UserPassword\Model as UserPasswordModel;
 
 /**
  * KanproBridge Plugin for Kanboard
@@ -42,6 +43,10 @@ class Plugin extends Base
       return new UserAvatarModel($c);
     };
 
+    $this->container['userPasswordModel'] = function ($c) {
+      return new UserPasswordModel($c);
+    };
+
     if ($this->configModel->get('jwt_enable', '') === '1') {
       $this->handleApiAuthHeader();
       $this->registerJWTAuthentication();
@@ -53,6 +58,10 @@ class Plugin extends Base
 
     if ($this->configModel->get('kanpro_user_avatar_enable', '') === '1') {
       $this->registerUserAvatarApi();
+    }
+
+    if ($this->configModel->get('kanpro_user_password_enable', '') === '1') {
+      $this->registerUserPasswordApi();
     }
   }
 
@@ -171,6 +180,18 @@ class Plugin extends Base
   }
 
   /**
+   * Register User Password API methods
+   */
+  private function registerUserPasswordApi()
+  {
+    $model = $this->container['userPasswordModel'];
+    $procedureHandler = $this->api->getProcedureHandler();
+
+    $procedureHandler->withClassAndMethod('changeUserPassword', $model, 'change');
+    $procedureHandler->withClassAndMethod('resetUserPassword', $model, 'reset');
+  }
+
+  /**
    * Get plugin name
    */
   public function getPluginName()
@@ -191,7 +212,7 @@ class Plugin extends Base
    */
   public function getPluginVersion()
   {
-    return '2.1.0';
+    return '2.2.0';
   }
 
   /**
@@ -218,6 +239,7 @@ class Plugin extends Base
     $jwtEnabled = $this->configModel->get('jwt_enable', '') === '1';
     $userMetadataEnabled = $this->configModel->get('kanpro_user_metadata_enable', '') === '1';
     $userAvatarEnabled = $this->configModel->get('kanpro_user_avatar_enable', '') === '1';
+    $userPasswordEnabled = $this->configModel->get('kanpro_user_password_enable', '') === '1';
 
     return [
       'name' => $this->getPluginName(),
@@ -250,6 +272,13 @@ class Plugin extends Base
             ['name' => 'uploadUserAvatar', 'description' => 'Upload avatar image (base64)'],
             ['name' => 'getUserAvatar', 'description' => 'Get avatar image (base64)'],
             ['name' => 'removeUserAvatar', 'description' => 'Remove avatar image'],
+          ],
+        ],
+        'user_password' => [
+          'enabled' => $userPasswordEnabled,
+          'methods' => [
+            ['name' => 'changeUserPassword', 'description' => 'Change own password (requires current password)'],
+            ['name' => 'resetUserPassword', 'description' => 'Reset user password (admin only)'],
           ],
         ],
       ],

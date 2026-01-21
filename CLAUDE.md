@@ -8,6 +8,7 @@ KanproBridge is a multi-functional Kanboard plugin that provides:
 - **JWT Authentication** for the Kanboard API (dual token mode: access + refresh tokens)
 - **User Metadata** storage for custom key-value pairs per user
 - **User Avatar** upload and retrieval via API
+- **User Password** change and reset via API
 
 ## Commands
 
@@ -41,8 +42,10 @@ KanproBridge/
 │   │   └── RevokedTokenModel.php  # Token revocation storage
 │   ├── UserMetadata/
 │   │   └── Model.php              # User metadata storage
-│   └── UserAvatar/
-│       └── Model.php              # User avatar API
+│   ├── UserAvatar/
+│   │   └── Model.php              # User avatar API
+│   └── UserPassword/
+│       └── Model.php              # User password API
 ├── Controller/
 │   └── ConfigController.php
 ├── Schema/
@@ -67,6 +70,7 @@ KanproBridge/
 - Registers `JWTAuthProvider` when JWT is enabled
 - Registers User Metadata API when enabled
 - Registers User Avatar API when enabled
+- Registers User Password API when enabled
 - Exposes JSON-RPC API methods
 
 **Feature/JWTAuth/Provider.php** - Implements `PasswordAuthenticationProviderInterface`:
@@ -94,6 +98,10 @@ KanproBridge/
 - `upload($userId, $imageData)` - Upload avatar (base64 encoded)
 - `get($userId)` - Get avatar (base64 encoded)
 - `remove($userId)` - Remove avatar
+
+**Feature/UserPassword/Model.php** - User password API:
+- `change($currentPassword, $newPassword)` - Change own password (requires current)
+- `reset($userId, $newPassword)` - Reset any user's password (admin only)
 
 **Schema/** - Database schema migrations:
 - `version_1`: Creates `jwt_revoked_tokens` table
@@ -143,6 +151,12 @@ Token structure includes:
 | `uploadUserAvatar` | `userId`, `imageData` (base64) | Self or admin |
 | `getUserAvatar` | `userId` | Self or admin |
 | `removeUserAvatar` | `userId` | Self or admin |
+
+#### User Password
+| Method | Parameters | Permission |
+|--------|------------|------------|
+| `changeUserPassword` | `currentPassword`, `newPassword` | Self only |
+| `resetUserPassword` | `userId`, `newPassword` | Admin only |
 
 ### API Testing
 
@@ -201,6 +215,16 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "removeUserAvatar", "params": {"userId": 1}, "id": 1}' \
   "http://localhost/jsonrpc.php"
+
+# User Password: Change own password
+curl -X POST -u "user:password" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "changeUserPassword", "params": {"currentPassword": "oldpass", "newPassword": "newpass"}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# User Password: Reset (admin only)
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "resetUserPassword", "params": {"userId": 1, "newPassword": "resetpass"}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
 ```
 
 ### Configuration Keys
@@ -220,6 +244,9 @@ Stored in Kanboard's config model:
 
 **User Avatar Settings:**
 - `kanpro_user_avatar_enable` - Enable/disable User Avatar API
+
+**User Password Settings:**
+- `kanpro_user_password_enable` - Enable/disable User Password API
 
 ### Dependencies
 
