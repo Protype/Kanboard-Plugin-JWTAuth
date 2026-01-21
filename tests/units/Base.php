@@ -44,6 +44,11 @@ abstract class Base extends TestCase
     protected $userMetadataStorage = [];
 
     /**
+     * @var array Mock avatar storage
+     */
+    protected $avatarStorage = [];
+
+    /**
      * Set up test environment
      */
     protected function setUp(): void
@@ -54,12 +59,15 @@ abstract class Base extends TestCase
         $this->configStorage = [];
         $this->revokedTokensStorage = [];
         $this->userMetadataStorage = [];
+        $this->avatarStorage = [];
 
         $this->setupConfigModel();
         $this->setupUserSession();
         $this->setupHelper();
         $this->setupRevokedTokenModel();
         $this->setupDatabase();
+        $this->setupAvatarFileModel();
+        $this->setupObjectStorage();
     }
 
     /**
@@ -151,6 +159,28 @@ abstract class Base extends TestCase
 
         $db = new MockDatabase($metadataStorage);
         $this->container['db'] = $db;
+    }
+
+    /**
+     * Set up mock avatar file model
+     */
+    protected function setupAvatarFileModel(): void
+    {
+        $avatarStorage = &$this->avatarStorage;
+
+        $model = new MockAvatarFileModel($avatarStorage);
+        $this->container['avatarFileModel'] = $model;
+    }
+
+    /**
+     * Set up mock object storage
+     */
+    protected function setupObjectStorage(): void
+    {
+        $avatarStorage = &$this->avatarStorage;
+
+        $objectStorage = new MockObjectStorage($avatarStorage);
+        $this->container['objectStorage'] = $objectStorage;
     }
 
     /**
@@ -406,5 +436,65 @@ class MockDatabase
         );
 
         return $removed;
+    }
+}
+
+/**
+ * Mock Avatar File Model for testing
+ */
+class MockAvatarFileModel
+{
+    private $storage;
+
+    public function __construct(array &$storage)
+    {
+        $this->storage = &$storage;
+    }
+
+    public function getFilename(int $userId): ?string
+    {
+        return $this->storage[$userId]['filename'] ?? null;
+    }
+
+    public function uploadImageContent(int $userId, string $blob): bool
+    {
+        $filename = "avatars/{$userId}/" . md5($blob);
+        $this->storage[$userId] = [
+            'filename' => $filename,
+            'content' => $blob,
+        ];
+        return true;
+    }
+
+    public function remove(int $userId): bool
+    {
+        if (isset($this->storage[$userId])) {
+            unset($this->storage[$userId]);
+            return true;
+        }
+        return true;
+    }
+}
+
+/**
+ * Mock Object Storage for testing
+ */
+class MockObjectStorage
+{
+    private $storage;
+
+    public function __construct(array &$storage)
+    {
+        $this->storage = &$storage;
+    }
+
+    public function get(string $filename): string
+    {
+        foreach ($this->storage as $data) {
+            if (isset($data['filename']) && $data['filename'] === $filename) {
+                return $data['content'];
+            }
+        }
+        throw new \Exception("File not found: {$filename}");
     }
 }
