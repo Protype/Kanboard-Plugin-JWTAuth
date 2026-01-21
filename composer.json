@@ -1,6 +1,6 @@
 {
-  "name": "protype/kanboard-plugin-jwtauth",
-  "description": "Provide JWT authentication for Kanboard API",
+  "name": "protype/kanboard-plugin-kanpro-bridge",
+  "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
   "type": "library",
   "require": {
     "php": ">=7.2",
@@ -12,12 +12,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Kanboard\\Plugin\\JWTAuth\\": ""
+      "Kanboard\\Plugin\\KanproBridge\\": ""
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Kanboard\\Plugin\\JWTAuth\\Tests\\": "tests/"
+      "Kanboard\\Plugin\\KanproBridge\\Tests\\": "tests/"
     }
   },
   "minimum-stability": "stable",

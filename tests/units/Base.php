@@ -1,12 +1,12 @@
 <?php
 
-namespace Kanboard\Plugin\JWTAuth\Tests\Units;
+namespace Kanboard\Plugin\KanproBridge\Tests\Units;
 
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
 /**
- * Base test class for JWTAuth plugin tests
+ * Base test class for KanproBridge plugin tests
  *
  * Provides a mock Kanboard container with essential services
  */
@@ -39,6 +39,11 @@ abstract class Base extends TestCase
     protected $revokedTokensStorage = [];
 
     /**
+     * @var array Mock user metadata storage
+     */
+    protected $userMetadataStorage = [];
+
+    /**
      * Set up test environment
      */
     protected function setUp(): void
@@ -48,11 +53,13 @@ abstract class Base extends TestCase
         $this->container = new Container();
         $this->configStorage = [];
         $this->revokedTokensStorage = [];
+        $this->userMetadataStorage = [];
 
         $this->setupConfigModel();
         $this->setupUserSession();
         $this->setupHelper();
         $this->setupRevokedTokenModel();
+        $this->setupDatabase();
     }
 
     /**
@@ -133,6 +140,17 @@ abstract class Base extends TestCase
 
         $model = new MockRevokedTokenModel($storage);
         $this->container['jwtRevokedTokenModel'] = $model;
+    }
+
+    /**
+     * Set up mock database for user metadata
+     */
+    protected function setupDatabase(): void
+    {
+        $metadataStorage = &$this->userMetadataStorage;
+
+        $db = new MockDatabase($metadataStorage);
+        $this->container['db'] = $db;
     }
 
     /**
@@ -267,5 +285,126 @@ class MockRevokedTokenModel
             return $this->storage["__all_revoked"]['revoked_at'] >= $tokenIssuedAt;
         }
         return false;
+    }
+}
+
+/**
+ * Mock Database for testing
+ */
+class MockDatabase
+{
+    private $storage;
+    private $currentTable;
+    private $conditions = [];
+
+    public function __construct(array &$storage)
+    {
+        $this->storage = &$storage;
+    }
+
+    public function table(string $tableName)
+    {
+        $this->currentTable = $tableName;
+        $this->conditions = [];
+        return $this;
+    }
+
+    public function eq(string $column, $value)
+    {
+        $this->conditions[$column] = $value;
+        return $this;
+    }
+
+    public function findAll(): array
+    {
+        if (!isset($this->storage[$this->currentTable])) {
+            return [];
+        }
+
+        $results = [];
+        foreach ($this->storage[$this->currentTable] as $row) {
+            $match = true;
+            foreach ($this->conditions as $column => $value) {
+                if (!isset($row[$column]) || $row[$column] !== $value) {
+                    $match = false;
+                    break;
+                }
+            }
+            if ($match) {
+                $results[] = $row;
+            }
+        }
+
+        return $results;
+    }
+
+    public function findOne()
+    {
+        $results = $this->findAll();
+        return $results[0] ?? null;
+    }
+
+    public function exists(): bool
+    {
+        return $this->findOne() !== null;
+    }
+
+    public function insert(array $data): bool
+    {
+        if (!isset($this->storage[$this->currentTable])) {
+            $this->storage[$this->currentTable] = [];
+        }
+
+        // Auto-generate ID
+        $data['id'] = count($this->storage[$this->currentTable]) + 1;
+        $this->storage[$this->currentTable][] = $data;
+
+        return true;
+    }
+
+    public function update(array $data): bool
+    {
+        if (!isset($this->storage[$this->currentTable])) {
+            return false;
+        }
+
+        foreach ($this->storage[$this->currentTable] as &$row) {
+            $match = true;
+            foreach ($this->conditions as $column => $value) {
+                if (!isset($row[$column]) || $row[$column] !== $value) {
+                    $match = false;
+                    break;
+                }
+            }
+            if ($match) {
+                $row = array_merge($row, $data);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function remove(): bool
+    {
+        if (!isset($this->storage[$this->currentTable])) {
+            return false;
+        }
+
+        $removed = false;
+        $this->storage[$this->currentTable] = array_filter(
+            $this->storage[$this->currentTable],
+            function ($row) use (&$removed) {
+                foreach ($this->conditions as $column => $value) {
+                    if (!isset($row[$column]) || $row[$column] !== $value) {
+                        return true;
+                    }
+                }
+                $removed = true;
+                return false;
+            }
+        );
+
+        return $removed;
     }
 }

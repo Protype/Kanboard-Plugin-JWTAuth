@@ -1,3 +1,15 @@
-form#JWTAuth input:read-only {
+form#KanproBridge input:read-only {
   background-color: #f3f3f3;
+}
+
+form#KanproBridge fieldset {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+form#KanproBridge fieldset legend {
+  font-weight: bold;
+  padding: 0 10px;
 }

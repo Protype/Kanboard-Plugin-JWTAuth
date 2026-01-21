@@ -1,6 +1,6 @@
 <?php
 
-namespace Kanboard\Plugin\JWTAuth\Controller;
+namespace Kanboard\Plugin\KanproBridge\Controller;
 
 use Kanboard\Controller\BaseController;
 use Firebase\JWT\JWT;
@@ -8,7 +8,7 @@ use Firebase\JWT\JWT;
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 /**
- * Config Controller for JWT settings
+ * Config Controller for KanproBridge settings
  */
 class ConfigController extends BaseController
 {
@@ -31,8 +31,8 @@ class ConfigController extends BaseController
       $values['jwt_secret'] = $this->generateSecret();
     }
 
-    $this->response->html($this->helper->layout->config('JWTAuth:config/settings', [
-      'title' => t('JWT settings'),
+    $this->response->html($this->helper->layout->config('KanproBridge:config/settings', [
+      'title' => t('KanproBridge Settings'),
       'values' => $values,
     ]));
   }
@@ -48,11 +48,15 @@ class ConfigController extends BaseController
       $values['jwt_enable'] = '';
     }
 
+    if (!isset($values['kanpro_user_metadata_enable'])) {
+      $values['kanpro_user_metadata_enable'] = '';
+    }
+
     if ($values['jwt_enable'] !== '' && $values['jwt_secret'] === '') {
       $values['jwt_secret'] = $this->generateSecret();
     }
 
-    $configUrl = $this->helper->url->to('ConfigController', 'show', ['plugin' => 'JWTAuth']);
+    $configUrl = $this->helper->url->to('ConfigController', 'show', ['plugin' => 'KanproBridge']);
     $redirect = $this->request->getStringParam('redirect', $configUrl);
 
     if ($this->configModel->save($values)) {

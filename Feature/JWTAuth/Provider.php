@@ -1,21 +1,21 @@
 <?php
 
-namespace Kanboard\Plugin\JWTAuth\Auth;
+namespace Kanboard\Plugin\KanproBridge\Feature\JWTAuth;
 
-use Kanboard\Plugin\JWTAuth\Controller\ConfigController;
+use Kanboard\Plugin\KanproBridge\Controller\ConfigController;
 use Kanboard\Core\Security\PasswordAuthenticationProviderInterface;
 use Kanboard\User\DatabaseUserProvider;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once dirname(dirname(__DIR__)) . '/vendor/autoload.php';
 
 /**
  * JWT Authentication provider
  *
  * Supports dual token system (access + refresh tokens)
  */
-class JWTAuthProvider implements PasswordAuthenticationProviderInterface
+class Provider implements PasswordAuthenticationProviderInterface
 {
   /** @var mixed */
   private $container;

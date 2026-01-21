@@ -1,6 +1,6 @@
 <?php
 
-namespace Kanboard\Plugin\JWTAuth\Tests\Units\Controller;
+namespace Kanboard\Plugin\KanproBridge\Tests\Units\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Firebase\JWT\JWT;

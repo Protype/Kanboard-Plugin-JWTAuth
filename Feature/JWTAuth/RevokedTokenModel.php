@@ -1,13 +1,13 @@
 <?php
 
-namespace Kanboard\Plugin\JWTAuth\Model;
+namespace Kanboard\Plugin\KanproBridge\Feature\JWTAuth;
 
 /**
  * JWT Revoked Token Model
  *
  * Manages the storage and retrieval of revoked JWT tokens
  */
-class JWTRevokedTokenModel
+class RevokedTokenModel
 {
     /**
      * @var mixed Database connection or storage

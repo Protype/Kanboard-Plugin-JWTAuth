@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Kanboard-Plugin-JWTAuth is a Kanboard plugin that provides JWT (JSON Web Token) authentication for the Kanboard API. It uses dual token mode (access + refresh tokens).
+KanproBridge is a multi-functional Kanboard plugin that provides:
+- **JWT Authentication** for the Kanboard API (dual token mode: access + refresh tokens)
+- **User Metadata** storage for custom key-value pairs per user
 
 ## Commands
 
@@ -22,21 +24,48 @@ composer install
 
 Run specific test suite:
 ```sh
-./vendor/bin/phpunit -c tests/phpunit.xml --testsuite "JWTAuth Unit Tests"
-./vendor/bin/phpunit -c tests/phpunit.xml --testsuite "JWTAuth Integration Tests"
+./vendor/bin/phpunit -c tests/phpunit.xml --testsuite "KanproBridge Unit Tests"
+./vendor/bin/phpunit -c tests/phpunit.xml --testsuite "KanproBridge Integration Tests"
 ```
 
 ## Architecture
 
+### Directory Structure
+
+```
+KanproBridge/
+├── Feature/
+│   ├── JWTAuth/
+│   │   ├── Provider.php           # JWT authentication provider
+│   │   └── RevokedTokenModel.php  # Token revocation storage
+│   └── UserMetadata/
+│       └── Model.php              # User metadata storage
+├── Controller/
+│   └── ConfigController.php
+├── Schema/
+│   ├── Sqlite.php
+│   ├── Mysql.php
+│   └── Postgres.php
+├── Template/config/
+│   ├── settings.php               # Unified settings page
+│   └── sidebar.php
+├── Assets/
+├── tests/
+│   └── units/Feature/...
+├── Plugin.php
+└── composer.json
+```
+
 ### Key Components
 
 **Plugin.php** - Entry point that:
-- Registers the settings route at `settings/jwtauth`
+- Registers the settings route at `settings/kanprobridge`
 - Hooks templates and assets into Kanboard's layout
 - Registers `JWTAuthProvider` when JWT is enabled
-- Exposes JSON-RPC API methods: `getJWTPlugin`, `getJWTToken`, `refreshJWTToken`, `revokeJWTToken`, `revokeUserJWTTokens`, `revokeAllJWTTokens`
+- Registers User Metadata API when enabled
+- Exposes JSON-RPC API methods
 
-**Auth/JWTAuthProvider.php** - Implements `PasswordAuthenticationProviderInterface`:
+**Feature/JWTAuth/Provider.php** - Implements `PasswordAuthenticationProviderInterface`:
 - `generateToken()` - Creates JWT(s) with user claims
 - `generateAccessToken()` / `generateRefreshToken()` - Dual token mode
 - `refreshToken($refreshToken)` - Exchange refresh token for new tokens (token rotation)
@@ -45,18 +74,25 @@ Run specific test suite:
 - `verifyToken($token)` - Validates JWT tokens using HS256 algorithm
 - `authenticate()` - Called by Kanboard's auth manager
 
-**Model/JWTRevokedTokenModel.php** - Token revocation storage:
+**Feature/JWTAuth/RevokedTokenModel.php** - Token revocation storage:
 - `add($jti, $userId, $tokenType, $expiresAt)` - Add revoked token
 - `isRevoked($jti)` - Check if token is revoked
 - `revokeAllByUser($userId)` - Revoke all user tokens
 
-**Schema/** - Database schema migrations for token revocation table:
-- `Sqlite.php`, `Mysql.php`, `Postgres.php` - Creates `jwt_revoked_tokens` table
-- Schema is automatically loaded by Kanboard's plugin system on first use
+**Feature/UserMetadata/Model.php** - User metadata storage:
+- `getAll($userId)` - Get all metadata for a user
+- `get($userId, $name, $default)` - Get specific metadata value
+- `exists($userId, $name)` - Check if metadata exists
+- `save($userId, $values)` - Save metadata key-value pairs
+- `remove($userId, $name)` - Remove specific metadata entry
+
+**Schema/** - Database schema migrations:
+- `version_1`: Creates `jwt_revoked_tokens` table
+- `version_2`: Creates `kanpro_user_metadata` table
 
 ### Dual Token Mode
 
-The plugin always operates in dual token mode:
+The JWT feature always operates in dual token mode:
 
 - **Access Token**: Default 3 days, used for API authentication
 - **Refresh Token**: Default 30 days, used to obtain new access tokens
@@ -66,16 +102,31 @@ Token structure includes:
 - `type` - Token type ('access' or 'refresh')
 - Standard JWT claims (iss, aud, iat, nbf, exp, data)
 
+### User Metadata Permissions
+
+- Users can only access their own metadata
+- Administrators can access any user's metadata
+- All operations return `false` or `null` if access is denied
+
 ### API Methods
 
-| Method | Description |
-|--------|-------------|
-| `getJWTPlugin` | Get plugin info and available methods |
-| `getJWTToken` | Get access + refresh tokens |
-| `refreshJWTToken` | Exchange refresh token for new tokens (token rotation) |
-| `revokeJWTToken` | Revoke a specific token |
-| `revokeUserJWTTokens` | Revoke all tokens for a specific user (admin only) |
-| `revokeAllJWTTokens` | Revoke all tokens in system (admin only) |
+#### JWT Auth (original names preserved)
+| Method | Description | Permission |
+|--------|-------------|------------|
+| `getJWTPlugin` | Get plugin info and available methods | Any user |
+| `getJWTToken` | Get access + refresh tokens | Any user |
+| `refreshJWTToken` | Exchange refresh token for new tokens | Any user |
+| `revokeJWTToken` | Revoke a specific token | Own token only |
+| `revokeUserJWTTokens` | Revoke all tokens for a user | Admin only |
+| `revokeAllJWTTokens` | Revoke all tokens in system | Admin only |
+
+#### User Metadata (new)
+| Method | Parameters | Permission |
+|--------|------------|------------|
+| `getUserMetadata` | `userId` | Self or admin |
+| `getUserMetadataByName` | `userId`, `name`, `default` | Self or admin |
+| `saveUserMetadata` | `userId`, `values` | Self or admin |
+| `removeUserMetadata` | `userId`, `name` | Self or admin |
 
 ### API Testing
 
@@ -99,25 +150,46 @@ curl -X POST -u "admin:access_token" -H "Content-Type: application/json" \
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "revokeJWTToken", "params": {"token": "TOKEN_TO_REVOKE"}, "id": 1}' \
   "http://localhost/jsonrpc.php"
+
+# User Metadata: Save
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "saveUserMetadata", "params": {"userId": 1, "values": {"theme": "dark"}}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# User Metadata: Get all
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getUserMetadata", "params": {"userId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# User Metadata: Get by name
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getUserMetadataByName", "params": {"userId": 1, "name": "theme"}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# User Metadata: Remove
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "removeUserMetadata", "params": {"userId": 1, "name": "theme"}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
 ```
 
 ### Configuration Keys
 
 Stored in Kanboard's config model:
 
-**Basic Settings:**
+**JWT Settings:**
 - `jwt_enable` - Enable/disable JWT authentication
 - `jwt_secret` - HS256 signing key (auto-generated if empty)
 - `jwt_issuer` - Token issuer claim (defaults to application URL)
 - `jwt_audience` - Token audience claim (defaults to application URL)
-
-**Token Expiration:**
 - `jwt_access_expiration` - Access token TTL (default: 259200 = 3 days)
 - `jwt_refresh_expiration` - Refresh token TTL (default: 2592000 = 30 days)
+
+**User Metadata Settings:**
+- `kanpro_user_metadata_enable` - Enable/disable User Metadata API
 
 ### Dependencies
 
 - PHP >= 7.2
 - `firebase/php-jwt` ^6.0
 
-Note: The plugin manually loads `vendor/autoload.php` in both `JWTAuthProvider.php` and `ConfigController.php` since Kanboard doesn't use Composer autoloading for plugins.
+Note: The plugin manually loads `vendor/autoload.php` in both `Provider.php` and `ConfigController.php` since Kanboard doesn't use Composer autoloading for plugins.

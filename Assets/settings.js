@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-  var $form = $('form#JWTAuth');
+  var $form = $('form#KanproBridge');
   var $jwtEnable = $form.find('#jwt_enable');
   var $jwtSecret = $form.find('#jwt_secret');
   var $jwtIssuer = $form.find('#jwt_issuer');

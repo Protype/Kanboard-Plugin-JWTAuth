@@ -1,48 +1,66 @@
 <div class="page-header">
-  <h2><?= t('JWT settings') ?></h2>
+  <h2><?= t('KanproBridge Settings') ?></h2>
 </div>
 
-<form id="JWTAuth" method="post" action="<?= $this->url->href('ConfigController', 'save', ['plugin' => 'JWTAuth']) ?>" autocomplete="off">
+<form id="KanproBridge" method="post" action="<?= $this->url->href('ConfigController', 'save', ['plugin' => 'KanproBridge']) ?>" autocomplete="off">
   <?= $this->form->csrf() ?>
 
-  <div class="form-group">
-    <label for="jwt_enable">
-      <input type="checkbox" name="jwt_enable" value="1" id="jwt_enable" class="form-control" <?= ($this->task->configModel->get('jwt_enable', '') === '1') ? 'checked' : '' ?>>
-      <?= t('Enable JWT Auth') ?>
-    </label>
-  </div>
+  <!-- JWT Authentication Section -->
+  <fieldset>
+    <legend><?= t('JWT Authentication') ?></legend>
 
-  <div class="form-group">
-    <label for="api_key"><?= t('JWT Secret') ?> *</label>
-    <input type="text" name="jwt_secret" id="jwt_secret" class="form-control" value="<?= $this->task->configModel->get('jwt_secret', '') ?>"
-      <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
-  </div>
+    <div class="form-group">
+      <label for="jwt_enable">
+        <input type="checkbox" name="jwt_enable" value="1" id="jwt_enable" class="form-control" <?= ($this->task->configModel->get('jwt_enable', '') === '1') ? 'checked' : '' ?>>
+        <?= t('Enable JWT Auth') ?>
+      </label>
+    </div>
 
-  <div class="form-group">
-    <label for="jwt_issuer"><?= t('JWT Issuer') ?></label>
-    <input type="text" name="jwt_issuer" id="jwt_issuer" class="form-control" value="<?= $this->task->configModel->get('jwt_issuer', ''); ?>"
-      <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
-  </div>
+    <div class="form-group">
+      <label for="jwt_secret"><?= t('JWT Secret') ?> *</label>
+      <input type="text" name="jwt_secret" id="jwt_secret" class="form-control" value="<?= $this->task->configModel->get('jwt_secret', '') ?>"
+        <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
+    </div>
 
-  <div class="form-group">
-    <label for="jwt_audience"><?= t('JWT Audience') ?></label>
-    <input type="text" name="jwt_audience" id="jwt_audience" class="form-control" value="<?= $this->task->configModel->get('jwt_audience', '') ?>"
-      <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
-  </div>
+    <div class="form-group">
+      <label for="jwt_issuer"><?= t('JWT Issuer') ?></label>
+      <input type="text" name="jwt_issuer" id="jwt_issuer" class="form-control" value="<?= $this->task->configModel->get('jwt_issuer', ''); ?>"
+        <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
+    </div>
 
-  <div class="form-group">
-    <label for="jwt_access_expiration"><?= t('Access Token Expiration (seconds)') ?></label>
-    <input type="number" name="jwt_access_expiration" id="jwt_access_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_access_expiration', '') ?>"
-      placeholder="259200"
-      <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
-  </div>
+    <div class="form-group">
+      <label for="jwt_audience"><?= t('JWT Audience') ?></label>
+      <input type="text" name="jwt_audience" id="jwt_audience" class="form-control" value="<?= $this->task->configModel->get('jwt_audience', '') ?>"
+        <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
+    </div>
 
-  <div class="form-group">
-    <label for="jwt_refresh_expiration"><?= t('Refresh Token Expiration (seconds)') ?></label>
-    <input type="number" name="jwt_refresh_expiration" id="jwt_refresh_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_refresh_expiration', '') ?>"
-      placeholder="2592000"
-      <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
-  </div>
+    <div class="form-group">
+      <label for="jwt_access_expiration"><?= t('Access Token Expiration (seconds)') ?></label>
+      <input type="number" name="jwt_access_expiration" id="jwt_access_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_access_expiration', '') ?>"
+        placeholder="259200"
+        <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
+    </div>
+
+    <div class="form-group">
+      <label for="jwt_refresh_expiration"><?= t('Refresh Token Expiration (seconds)') ?></label>
+      <input type="number" name="jwt_refresh_expiration" id="jwt_refresh_expiration" class="form-control" value="<?= $this->task->configModel->get('jwt_refresh_expiration', '') ?>"
+        placeholder="2592000"
+        <?= $this->task->configModel->get('jwt_enable', false) ? '' : 'readonly' ?>>
+    </div>
+  </fieldset>
+
+  <!-- User Metadata Section -->
+  <fieldset>
+    <legend><?= t('User Metadata') ?></legend>
+
+    <div class="form-group">
+      <label for="kanpro_user_metadata_enable">
+        <input type="checkbox" name="kanpro_user_metadata_enable" value="1" id="kanpro_user_metadata_enable" class="form-control" <?= ($this->task->configModel->get('kanpro_user_metadata_enable', '') === '1') ? 'checked' : '' ?>>
+        <?= t('Enable User Metadata API') ?>
+      </label>
+      <p class="form-help"><?= t('Allows storing custom key-value pairs for users. Only the user themselves or administrators can access their metadata.') ?></p>
+    </div>
+  </fieldset>
 
   <div class="form-actions">
     <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>

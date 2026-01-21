@@ -6,10 +6,10 @@
          stopOnError="true"
          stopOnFailure="true">
     <testsuites>
-        <testsuite name="JWTAuth Unit Tests">
+        <testsuite name="KanproBridge Unit Tests">
             <directory>units</directory>
         </testsuite>
-        <testsuite name="JWTAuth Integration Tests">
+        <testsuite name="KanproBridge Integration Tests">
             <directory>integration</directory>
         </testsuite>
     </testsuites>
