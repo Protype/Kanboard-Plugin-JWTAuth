@@ -110,7 +110,7 @@ Token structure includes:
 
 ### API Methods
 
-#### JWT Auth (original names preserved)
+#### JWT Auth
 | Method | Description | Permission |
 |--------|-------------|------------|
 | `getKanproBridgePlugin` | Get plugin info and available methods | Any user |
