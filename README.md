@@ -80,7 +80,7 @@ curl -u "user:password" -X POST \
 {
   "result": {
     "name": "KanproBridge",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
     "features": {...}
   }
@@ -267,7 +267,7 @@ curl -u "user:password" -X POST \
 {
   "result": {
     "name": "KanproBridge",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
     "features": {...}
   }
