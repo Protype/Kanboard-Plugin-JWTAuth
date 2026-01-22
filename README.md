@@ -42,6 +42,12 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 |---------|-------------|---------|
 | Enable User Password | Enable/disable User Password API | Disabled |
 
+### User Profile Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable User Profile | Enable/disable User Profile API | Disabled |
+
 ## API Methods
 
 ### JWT Authentication
@@ -79,6 +85,13 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 | `changeUserPassword` | Self only | Change own password (requires current) |
 | `resetUserPassword` | Admin only | Reset any user's password |
 
+### User Profile
+
+| Method | Permission | Description |
+|--------|------------|-------------|
+| `getUserProfile` | Self or Admin | Get user profile data |
+| `updateUserProfile` | Self or Admin | Update profile (username, name, email, theme, timezone, language, filter) |
+
 ## Usage
 
 ### Get Plugin Info
@@ -94,7 +107,7 @@ curl -u "user:password" -X POST \
 {
   "result": {
     "name": "KanproBridge",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
     "features": {...}
   }
@@ -201,6 +214,40 @@ curl -u "admin:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+### Get User Profile
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getUserProfile","id":1,"params":{"userId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**Response:**
+```json
+{
+  "result": {
+    "id": 1,
+    "username": "user",
+    "name": "User Name",
+    "email": "user@example.com",
+    "theme": "dark",
+    "timezone": "Asia/Taipei",
+    "language": "zh_TW",
+    "filter": "status:open",
+    "role": "app-user",
+    "is_active": 1
+  }
+}
+```
+
+### Update User Profile
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"updateUserProfile","id":1,"params":{"userId":1,"values":{"name":"New Name","theme":"light","timezone":"UTC"}}}' \
+  http://localhost/jsonrpc.php
+```
+
 ## Troubleshooting
 
 ### "Method not found" Error
@@ -217,7 +264,7 @@ API methods require their feature to be enabled first. If you see:
 
 # KanproBridge (繁體中文)
 
-多功能 Kanboard 外掛，提供 JWT 認證、使用者 Metadata、頭像與密碼 API。
+多功能 Kanboard 外掛，提供 JWT 認證、使用者 Metadata、頭像、密碼與個人資料 API。
 
 ## 功能
 
@@ -225,6 +272,7 @@ API methods require their feature to be enabled first. If you see:
 - **User Metadata**：使用者自訂鍵值對儲存
 - **User Avatar**：透過 API 上傳與取得頭像
 - **User Password**：透過 API 更改與重設密碼
+- **User Profile**：透過 API 取得與更新個人資料
 
 ## 安裝
 
@@ -258,6 +306,12 @@ API methods require their feature to be enabled first. If you see:
 | 設定 | 說明 | 預設值 |
 |-----|------|-------|
 | 啟用 User Password | 啟用/停用 User Password API | 停用 |
+
+### User Profile 設定
+
+| 設定 | 說明 | 預設值 |
+|-----|------|-------|
+| 啟用 User Profile | 啟用/停用 User Profile API | 停用 |
 
 ## API 方法
 
@@ -296,6 +350,13 @@ API methods require their feature to be enabled first. If you see:
 | `changeUserPassword` | 僅限本人 | 更改自己密碼（需驗證舊密碼） |
 | `resetUserPassword` | 僅限管理員 | 重設任何使用者密碼 |
 
+### User Profile
+
+| 方法 | 權限 | 說明 |
+|-----|------|-----|
+| `getUserProfile` | 本人或管理員 | 取得使用者個人資料 |
+| `updateUserProfile` | 本人或管理員 | 更新個人資料（username, name, email, theme, timezone, language, filter） |
+
 ## 使用方式
 
 ### 取得外掛資訊
@@ -311,7 +372,7 @@ curl -u "user:password" -X POST \
 {
   "result": {
     "name": "KanproBridge",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
     "features": {...}
   }
@@ -415,6 +476,40 @@ curl -u "user:password" -X POST \
 ```sh
 curl -u "admin:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"resetUserPassword","id":1,"params":{"userId":1,"newPassword":"resetpass"}}' \
+  http://localhost/jsonrpc.php
+```
+
+### 取得個人資料
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getUserProfile","id":1,"params":{"userId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**回應：**
+```json
+{
+  "result": {
+    "id": 1,
+    "username": "user",
+    "name": "使用者名稱",
+    "email": "user@example.com",
+    "theme": "dark",
+    "timezone": "Asia/Taipei",
+    "language": "zh_TW",
+    "filter": "status:open",
+    "role": "app-user",
+    "is_active": 1
+  }
+}
+```
+
+### 更新個人資料
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"updateUserProfile","id":1,"params":{"userId":1,"values":{"name":"新名稱","theme":"light","timezone":"UTC"}}}' \
   http://localhost/jsonrpc.php
 ```
 

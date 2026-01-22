@@ -88,6 +88,19 @@
     </div>
   </fieldset>
 
+  <!-- User Profile Section -->
+  <fieldset>
+    <legend><?= t('User Profile') ?></legend>
+
+    <div class="form-group">
+      <label for="kanpro_user_profile_enable">
+        <input type="checkbox" name="kanpro_user_profile_enable" value="1" id="kanpro_user_profile_enable" class="form-control" <?= ($this->task->configModel->get('kanpro_user_profile_enable', '') === '1') ? 'checked' : '' ?>>
+        <?= t('Enable User Profile API') ?>
+      </label>
+      <p class="form-help"><?= t('Get and update profile: username, name, email, theme, timezone, language, filter.') ?></p>
+    </div>
+  </fieldset>
+
   <div class="form-actions">
     <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
   </div>

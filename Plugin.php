@@ -8,6 +8,7 @@ use Kanboard\Plugin\KanproBridge\Feature\JWTAuth\RevokedTokenModel;
 use Kanboard\Plugin\KanproBridge\Feature\UserMetadata\Model as UserMetadataModel;
 use Kanboard\Plugin\KanproBridge\Feature\UserAvatar\Model as UserAvatarModel;
 use Kanboard\Plugin\KanproBridge\Feature\UserPassword\Model as UserPasswordModel;
+use Kanboard\Plugin\KanproBridge\Feature\UserProfile\Model as UserProfileModel;
 
 /**
  * KanproBridge Plugin for Kanboard
@@ -47,6 +48,10 @@ class Plugin extends Base
       return new UserPasswordModel($c);
     };
 
+    $this->container['userProfileModel'] = function ($c) {
+      return new UserProfileModel($c);
+    };
+
     if ($this->configModel->get('jwt_enable', '') === '1') {
       $this->handleApiAuthHeader();
       $this->registerJWTAuthentication();
@@ -62,6 +67,10 @@ class Plugin extends Base
 
     if ($this->configModel->get('kanpro_user_password_enable', '') === '1') {
       $this->registerUserPasswordApi();
+    }
+
+    if ($this->configModel->get('kanpro_user_profile_enable', '') === '1') {
+      $this->registerUserProfileApi();
     }
   }
 
@@ -192,6 +201,18 @@ class Plugin extends Base
   }
 
   /**
+   * Register User Profile API methods
+   */
+  private function registerUserProfileApi()
+  {
+    $model = $this->container['userProfileModel'];
+    $procedureHandler = $this->api->getProcedureHandler();
+
+    $procedureHandler->withClassAndMethod('getUserProfile', $model, 'get');
+    $procedureHandler->withClassAndMethod('updateUserProfile', $model, 'update');
+  }
+
+  /**
    * Get plugin name
    */
   public function getPluginName()
@@ -212,7 +233,7 @@ class Plugin extends Base
    */
   public function getPluginVersion()
   {
-    return '2.2.0';
+    return '2.3.0';
   }
 
   /**
@@ -240,6 +261,7 @@ class Plugin extends Base
     $userMetadataEnabled = $this->configModel->get('kanpro_user_metadata_enable', '') === '1';
     $userAvatarEnabled = $this->configModel->get('kanpro_user_avatar_enable', '') === '1';
     $userPasswordEnabled = $this->configModel->get('kanpro_user_password_enable', '') === '1';
+    $userProfileEnabled = $this->configModel->get('kanpro_user_profile_enable', '') === '1';
 
     return [
       'name' => $this->getPluginName(),
@@ -279,6 +301,13 @@ class Plugin extends Base
           'methods' => [
             ['name' => 'changeUserPassword', 'description' => 'Change own password (requires current password)'],
             ['name' => 'resetUserPassword', 'description' => 'Reset user password (admin only)'],
+          ],
+        ],
+        'user_profile' => [
+          'enabled' => $userProfileEnabled,
+          'methods' => [
+            ['name' => 'getUserProfile', 'description' => 'Get user profile data'],
+            ['name' => 'updateUserProfile', 'description' => 'Update user profile fields'],
           ],
         ],
       ],

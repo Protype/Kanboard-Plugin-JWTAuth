@@ -9,6 +9,7 @@ KanproBridge is a multi-functional Kanboard plugin that provides:
 - **User Metadata** storage for custom key-value pairs per user
 - **User Avatar** upload and retrieval via API
 - **User Password** change and reset via API
+- **User Profile** get and update personal profile fields via API
 
 ## Commands
 
@@ -44,8 +45,10 @@ KanproBridge/
 │   │   └── Model.php              # User metadata storage
 │   ├── UserAvatar/
 │   │   └── Model.php              # User avatar API
-│   └── UserPassword/
-│       └── Model.php              # User password API
+│   ├── UserPassword/
+│   │   └── Model.php              # User password API
+│   └── UserProfile/
+│       └── Model.php              # User profile API
 ├── Controller/
 │   └── ConfigController.php
 ├── Schema/
@@ -71,6 +74,7 @@ KanproBridge/
 - Registers User Metadata API when enabled
 - Registers User Avatar API when enabled
 - Registers User Password API when enabled
+- Registers User Profile API when enabled
 - Exposes JSON-RPC API methods
 
 **Feature/JWTAuth/Provider.php** - Implements `PasswordAuthenticationProviderInterface`:
@@ -103,6 +107,10 @@ KanproBridge/
 - `change($currentPassword, $newPassword)` - Change own password (requires current)
 - `reset($userId, $newPassword)` - Reset any user's password (admin only)
 
+**Feature/UserProfile/Model.php** - User profile API:
+- `get($userId)` - Get user profile data
+- `update($userId, $values)` - Update profile fields (username, name, email, theme, timezone, language, filter)
+
 **Schema/** - Database schema migrations:
 - `version_1`: Creates `jwt_revoked_tokens` table
 - `version_2`: Creates `kanpro_user_metadata` table
@@ -119,7 +127,7 @@ Token structure includes:
 - `type` - Token type ('access' or 'refresh')
 - Standard JWT claims (iss, aud, iat, nbf, exp, data)
 
-### User Metadata / Avatar Permissions
+### User Metadata / Avatar / Profile Permissions
 
 - Users can only access their own data
 - Administrators can access any user's data
@@ -157,6 +165,12 @@ Token structure includes:
 |--------|------------|------------|
 | `changeUserPassword` | `currentPassword`, `newPassword` | Self only |
 | `resetUserPassword` | `userId`, `newPassword` | Admin only |
+
+#### User Profile
+| Method | Parameters | Permission |
+|--------|------------|------------|
+| `getUserProfile` | `userId` | Self or admin |
+| `updateUserProfile` | `userId`, `values` | Self or admin |
 
 ### API Testing
 
@@ -225,6 +239,16 @@ curl -X POST -u "user:password" -H "Content-Type: application/json" \
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "resetUserPassword", "params": {"userId": 1, "newPassword": "resetpass"}, "id": 1}' \
   "http://localhost/jsonrpc.php"
+
+# User Profile: Get
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getUserProfile", "params": {"userId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# User Profile: Update
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "updateUserProfile", "params": {"userId": 1, "values": {"name": "New Name", "theme": "dark", "timezone": "Asia/Taipei"}}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
 ```
 
 ### Configuration Keys
@@ -247,6 +271,9 @@ Stored in Kanboard's config model:
 
 **User Password Settings:**
 - `kanpro_user_password_enable` - Enable/disable User Password API
+
+**User Profile Settings:**
+- `kanpro_user_profile_enable` - Enable/disable User Profile API
 
 ### Dependencies
 

@@ -214,6 +214,26 @@ abstract class Base extends TestCase
     }
 
     /**
+     * Add a user with profile fields to storage for testing
+     */
+    protected function addUserWithProfile(int $id, string $username, string $password, array $profile = []): void
+    {
+        $this->userStorage[$id] = array_merge([
+            'id' => $id,
+            'username' => $username,
+            'password' => password_hash($password, PASSWORD_BCRYPT),
+            'name' => '',
+            'email' => '',
+            'theme' => 'light',
+            'timezone' => '',
+            'language' => '',
+            'filter' => '',
+            'role' => 'app-user',
+            'is_active' => 1,
+        ], $profile);
+    }
+
+    /**
      * Set a config value for testing
      */
     protected function setConfig(string $key, $value): void
