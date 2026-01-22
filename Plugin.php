@@ -142,7 +142,7 @@ class Plugin extends Base
     $jwtAuthProvider = new JWTAuthProvider($this->container);
     $procedureHandler = $this->api->getProcedureHandler();
 
-    $procedureHandler->withClassAndMethod('getKanproBridgePlugin', $this, 'getPluginInfo');
+    $procedureHandler->withClassAndMethod('getKanproBridgeStatus', $this, 'getPluginInfo');
     $procedureHandler->withClassAndMethod('getJWTToken', $jwtAuthProvider, 'generateToken');
     $procedureHandler->withClassAndMethod('refreshJWTToken', $jwtAuthProvider, 'refreshToken');
     $procedureHandler->withClassAndMethod('revokeJWTToken', $jwtAuthProvider, 'revokeToken');
@@ -249,7 +249,7 @@ class Plugin extends Base
         'jwt_auth' => [
           'enabled' => $jwtEnabled,
           'methods' => [
-            ['name' => 'getKanproBridgePlugin', 'description' => 'Get plugin info and available methods'],
+            ['name' => 'getKanproBridgeStatus', 'description' => 'Get plugin info and available methods'],
             ['name' => 'getJWTToken', 'description' => 'Get access + refresh tokens'],
             ['name' => 'refreshJWTToken', 'description' => 'Exchange refresh token for new access token'],
             ['name' => 'revokeJWTToken', 'description' => 'Revoke a specific token'],

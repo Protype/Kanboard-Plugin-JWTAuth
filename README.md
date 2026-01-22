@@ -48,7 +48,7 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 
 | Method | Permission | Description |
 |--------|------------|-------------|
-| `getKanproBridgePlugin` | Any user | Get plugin info and available methods |
+| `getKanproBridgeStatus` | Any user | Get plugin info and available methods |
 | `getJWTToken` | Any user | Get token(s) with basic auth |
 | `refreshJWTToken` | Any user | Exchange refresh token for new access token |
 | `revokeJWTToken` | Any user | Revoke own token only |
@@ -85,7 +85,7 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getKanproBridgePlugin","id":1}' \
+  -d '{"jsonrpc":"2.0","method":"getKanproBridgeStatus","id":1}' \
   http://localhost/jsonrpc.php
 ```
 
@@ -265,7 +265,7 @@ API methods require their feature to be enabled first. If you see:
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
-| `getKanproBridgePlugin` | 任何用戶 | 取得外掛資訊與可用方法清單 |
+| `getKanproBridgeStatus` | 任何用戶 | 取得外掛資訊與可用方法清單 |
 | `getJWTToken` | 任何用戶 | 使用基本認證取得 Token |
 | `refreshJWTToken` | 任何用戶 | 用刷新 Token 換取新的存取 Token |
 | `revokeJWTToken` | 任何用戶 | 僅能撤銷自己的 Token |
@@ -302,7 +302,7 @@ API methods require their feature to be enabled first. If you see:
 
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getKanproBridgePlugin","id":1}' \
+  -d '{"jsonrpc":"2.0","method":"getKanproBridgeStatus","id":1}' \
   http://localhost/jsonrpc.php
 ```
 
