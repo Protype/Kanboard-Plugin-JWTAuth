@@ -110,7 +110,7 @@
         <input type="checkbox" name="kanpro_project_user_enable" value="1" id="kanpro_project_user_enable" class="form-control" <?= ($this->task->configModel->get('kanpro_project_user_enable', '') === '1') ? 'checked' : '' ?>>
         <?= t('Enable Project User API') ?>
       </label>
-      <p class="form-help"><?= t('Extended getProjectUsers/getAssignableUsers that return full user objects (id, username, name, email, role, is_active, project_role).') ?></p>
+      <p class="form-help"><?= t('Overrides getProjectUsers/getAssignableUsers to return full user objects with avatar (id, username, name, email, role, is_active, project_role, avatar).') ?></p>
     </div>
   </fieldset>
 

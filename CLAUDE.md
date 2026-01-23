@@ -51,7 +51,7 @@ KanproBridge/
 │   ├── UserProfile/
 │   │   └── Model.php              # User profile API
 │   └── ProjectUser/
-│       └── Model.php              # Extended project user API
+│       └── Model.php              # Overrides project user API
 ├── Controller/
 │   └── ConfigController.php
 ├── Schema/
