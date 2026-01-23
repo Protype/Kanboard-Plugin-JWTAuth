@@ -10,7 +10,7 @@ KanproBridge is a multi-functional Kanboard plugin that provides:
 - **User Avatar** upload and retrieval via API
 - **User Password** change and reset via API
 - **User Profile** get and update personal profile fields via API
-- **Project User** extended getProjectUsers/getAssignableUsers returning full user objects
+- **Project User** overrides getProjectUsers/getAssignableUsers to return full user objects with avatar support
 
 ## Commands
 
@@ -115,8 +115,8 @@ KanproBridge/
 - `get($userId, $includeAvatar)` - Get user profile data (optionally with avatar)
 - `update($userId, $values)` - Update profile fields (username, name, email, theme, timezone, language, filter)
 
-**Feature/ProjectUser/Model.php** - Extended project user API:
-- `getProjectUsers($projectId, $includeAvatar)` - Get full user objects for project members
+**Feature/ProjectUser/Model.php** - Overrides Kanboard's project user API:
+- `getProjectUsers($projectId, $includeAvatar)` - Get full user objects for project members (replaces `{userId: username}` mapping)
 - `getAssignableUsers($projectId, $includeAvatar)` - Get full user objects for assignable users (excludes project-viewer)
 
 **Schema/** - Database schema migrations:
@@ -180,11 +180,11 @@ Token structure includes:
 | `getUserProfile` | `userId`, `includeAvatar` (optional) | Self or admin |
 | `updateUserProfile` | `userId`, `values` | Self or admin |
 
-#### Project User
+#### Project User (overrides Kanboard built-in)
 | Method | Parameters | Permission |
 |--------|------------|------------|
-| `getProjectUsersExtended` | `projectId`, `includeAvatar` (optional) | Any user |
-| `getAssignableUsersExtended` | `projectId`, `includeAvatar` (optional) | Any user |
+| `getProjectUsers` | `projectId`, `includeAvatar` (optional) | Any user |
+| `getAssignableUsers` | `projectId`, `includeAvatar` (optional) | Any user |
 
 ### API Testing
 
@@ -269,24 +269,24 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "updateUserProfile", "params": {"userId": 1, "values": {"name": "New Name", "theme": "dark", "timezone": "Asia/Taipei"}}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
-# Project User: Get all project members with full user data
+# Project User: Get all project members with full user data (overrides Kanboard built-in)
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "getProjectUsersExtended", "params": {"projectId": 1}, "id": 1}' \
+  -d '{"jsonrpc": "2.0", "method": "getProjectUsers", "params": {"projectId": 1}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
 # Project User: Get all project members with avatars
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "getProjectUsersExtended", "params": {"projectId": 1, "includeAvatar": true}, "id": 1}' \
+  -d '{"jsonrpc": "2.0", "method": "getProjectUsers", "params": {"projectId": 1, "includeAvatar": true}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
-# Project User: Get assignable users with full user data
+# Project User: Get assignable users with full user data (overrides Kanboard built-in)
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "getAssignableUsersExtended", "params": {"projectId": 1}, "id": 1}' \
+  -d '{"jsonrpc": "2.0", "method": "getAssignableUsers", "params": {"projectId": 1}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
 # Project User: Get assignable users with avatars
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "getAssignableUsersExtended", "params": {"projectId": 1, "includeAvatar": true}, "id": 1}' \
+  -d '{"jsonrpc": "2.0", "method": "getAssignableUsers", "params": {"projectId": 1, "includeAvatar": true}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 ```
 

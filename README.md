@@ -9,7 +9,7 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 - **User Avatar**: Upload and retrieve avatars via API
 - **User Password**: Change and reset passwords via API
 - **User Profile**: Get and update user profile fields via API
-- **Project User**: Extended getProjectUsers/getAssignableUsers returning full user objects
+- **Project User**: Overrides getProjectUsers/getAssignableUsers to return full user objects with avatar support
 
 ## Installation
 
@@ -100,12 +100,12 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 | `getUserProfile` | Self or Admin | Get user profile data (supports `includeAvatar` param) |
 | `updateUserProfile` | Self or Admin | Update profile (username, name, email, theme, timezone, language, filter) |
 
-### Project User
+### Project User (overrides Kanboard built-in)
 
 | Method | Permission | Description |
 |--------|------------|-------------|
-| `getProjectUsersExtended` | Any user | Get full user objects for all project members (supports `includeAvatar` param) |
-| `getAssignableUsersExtended` | Any user | Get full user objects for assignable users (supports `includeAvatar` param) |
+| `getProjectUsers` | Any user | Get full user objects for all project members (supports `includeAvatar` param) |
+| `getAssignableUsers` | Any user | Get full user objects for assignable users (supports `includeAvatar` param) |
 
 ## Usage
 
@@ -263,18 +263,18 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
-### Get Project Users (Extended)
+### Get Project Users (overrides Kanboard built-in)
 
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getProjectUsersExtended","id":1,"params":{"projectId":1}}' \
+  -d '{"jsonrpc":"2.0","method":"getProjectUsers","id":1,"params":{"projectId":1}}' \
   http://localhost/jsonrpc.php
 ```
 
 **With avatars:**
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getProjectUsersExtended","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
+  -d '{"jsonrpc":"2.0","method":"getProjectUsers","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
   http://localhost/jsonrpc.php
 ```
 
@@ -296,18 +296,18 @@ curl -u "user:password" -X POST \
 }
 ```
 
-### Get Assignable Users (Extended)
+### Get Assignable Users (overrides Kanboard built-in)
 
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1}}' \
+  -d '{"jsonrpc":"2.0","method":"getAssignableUsers","id":1,"params":{"projectId":1}}' \
   http://localhost/jsonrpc.php
 ```
 
 **With avatars:**
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
+  -d '{"jsonrpc":"2.0","method":"getAssignableUsers","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
   http://localhost/jsonrpc.php
 ```
 
@@ -338,7 +338,7 @@ API methods require their feature to be enabled first. If you see:
 - **User Avatar**：透過 API 上傳與取得頭像
 - **User Password**：透過 API 更改與重設密碼
 - **User Profile**：透過 API 取得與更新個人資料
-- **Project User**：擴充版 getProjectUsers/getAssignableUsers，回傳完整使用者物件
+- **Project User**：覆蓋 getProjectUsers/getAssignableUsers，回傳完整使用者物件與頭像
 
 ## 安裝
 
@@ -429,12 +429,12 @@ API methods require their feature to be enabled first. If you see:
 | `getUserProfile` | 本人或管理員 | 取得使用者個人資料（支援 `includeAvatar` 參數） |
 | `updateUserProfile` | 本人或管理員 | 更新個人資料（username, name, email, theme, timezone, language, filter） |
 
-### Project User
+### Project User（覆蓋 Kanboard 內建）
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
-| `getProjectUsersExtended` | 任何用戶 | 取得專案所有成員的完整使用者物件（支援 `includeAvatar` 參數） |
-| `getAssignableUsersExtended` | 任何用戶 | 取得可指派使用者的完整物件（支援 `includeAvatar` 參數） |
+| `getProjectUsers` | 任何用戶 | 取得專案所有成員的完整使用者物件（支援 `includeAvatar` 參數） |
+| `getAssignableUsers` | 任何用戶 | 取得可指派使用者的完整物件（支援 `includeAvatar` 參數） |
 
 ## 使用方式
 
@@ -592,18 +592,18 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
-### 取得專案成員（擴充版）
+### 取得專案成員（覆蓋 Kanboard 內建）
 
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getProjectUsersExtended","id":1,"params":{"projectId":1}}' \
+  -d '{"jsonrpc":"2.0","method":"getProjectUsers","id":1,"params":{"projectId":1}}' \
   http://localhost/jsonrpc.php
 ```
 
 **含頭像：**
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getProjectUsersExtended","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
+  -d '{"jsonrpc":"2.0","method":"getProjectUsers","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
   http://localhost/jsonrpc.php
 ```
 
@@ -625,18 +625,18 @@ curl -u "user:password" -X POST \
 }
 ```
 
-### 取得可指派使用者（擴充版）
+### 取得可指派使用者（覆蓋 Kanboard 內建）
 
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1}}' \
+  -d '{"jsonrpc":"2.0","method":"getAssignableUsers","id":1,"params":{"projectId":1}}' \
   http://localhost/jsonrpc.php
 ```
 
 **含頭像：**
 ```sh
 curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
+  -d '{"jsonrpc":"2.0","method":"getAssignableUsers","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
   http://localhost/jsonrpc.php
 ```
 

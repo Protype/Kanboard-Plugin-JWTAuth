@@ -223,14 +223,16 @@ class Plugin extends Base
 
   /**
    * Register Project User API methods
+   * Overrides Kanboard's built-in getProjectUsers/getAssignableUsers
+   * to return full user objects instead of {userId: username} mapping
    */
   private function registerProjectUserApi()
   {
     $model = $this->container['kanproProjectUserModel'];
     $procedureHandler = $this->api->getProcedureHandler();
 
-    $procedureHandler->withClassAndMethod('getProjectUsersExtended', $model, 'getProjectUsers');
-    $procedureHandler->withClassAndMethod('getAssignableUsersExtended', $model, 'getAssignableUsers');
+    $procedureHandler->withClassAndMethod('getProjectUsers', $model, 'getProjectUsers');
+    $procedureHandler->withClassAndMethod('getAssignableUsers', $model, 'getAssignableUsers');
   }
 
   /**
@@ -335,8 +337,8 @@ class Plugin extends Base
         'project_user' => [
           'enabled' => $projectUserEnabled,
           'methods' => [
-            ['name' => 'getProjectUsersExtended', 'description' => 'Get full user objects for project members'],
-            ['name' => 'getAssignableUsersExtended', 'description' => 'Get full user objects for assignable users'],
+            ['name' => 'getProjectUsers', 'description' => 'Get full user objects for project members (overrides Kanboard built-in)'],
+            ['name' => 'getAssignableUsers', 'description' => 'Get full user objects for assignable users (overrides Kanboard built-in)'],
           ],
         ],
       ],
