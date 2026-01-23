@@ -82,9 +82,10 @@ class Model
      * Get user profile
      *
      * @param int $userId User ID
+     * @param bool $includeAvatar Whether to include avatar data (base64)
      * @return array|false Profile data or false if access denied
      */
-    public function get($userId)
+    public function get($userId, $includeAvatar = false)
     {
         if (!$this->canAccess($userId)) {
             return false;
@@ -103,7 +104,33 @@ class Model
             }
         }
 
+        // Include avatar if requested
+        if ($includeAvatar) {
+            $profile['avatar'] = $this->getAvatarData($userId);
+        }
+
         return $profile;
+    }
+
+    /**
+     * Get avatar data for a user
+     *
+     * @param int $userId User ID
+     * @return string|null Base64 encoded avatar or null if not found
+     */
+    private function getAvatarData($userId)
+    {
+        $filename = $this->container['avatarFileModel']->getFilename($userId);
+        if (empty($filename)) {
+            return null;
+        }
+
+        try {
+            $blob = $this->container['objectStorage']->get($filename);
+            return base64_encode($blob);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**

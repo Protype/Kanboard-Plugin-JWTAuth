@@ -97,15 +97,15 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 
 | Method | Permission | Description |
 |--------|------------|-------------|
-| `getUserProfile` | Self or Admin | Get user profile data |
+| `getUserProfile` | Self or Admin | Get user profile data (supports `includeAvatar` param) |
 | `updateUserProfile` | Self or Admin | Update profile (username, name, email, theme, timezone, language, filter) |
 
 ### Project User
 
 | Method | Permission | Description |
 |--------|------------|-------------|
-| `getProjectUsersExtended` | Any user | Get full user objects for all project members |
-| `getAssignableUsersExtended` | Any user | Get full user objects for assignable users (excludes viewers) |
+| `getProjectUsersExtended` | Any user | Get full user objects for all project members (supports `includeAvatar` param) |
+| `getAssignableUsersExtended` | Any user | Get full user objects for assignable users (supports `includeAvatar` param) |
 
 ## Usage
 
@@ -271,6 +271,13 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+**With avatars:**
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getProjectUsersExtended","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
+  http://localhost/jsonrpc.php
+```
+
 **Response:**
 ```json
 {
@@ -282,16 +289,8 @@ curl -u "user:password" -X POST \
       "email": "alice@example.com",
       "role": "app-user",
       "is_active": 1,
-      "project_role": "project-manager"
-    },
-    {
-      "id": 2,
-      "username": "bob",
-      "name": "Bob",
-      "email": "bob@example.com",
-      "role": "app-user",
-      "is_active": 1,
-      "project_role": "project-member"
+      "project_role": "project-manager",
+      "avatar": "base64_encoded_image_or_null"
     }
   ]
 }
@@ -302,6 +301,13 @@ curl -u "user:password" -X POST \
 ```sh
 curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**With avatars:**
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
   http://localhost/jsonrpc.php
 ```
 
@@ -420,15 +426,15 @@ API methods require their feature to be enabled first. If you see:
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
-| `getUserProfile` | 本人或管理員 | 取得使用者個人資料 |
+| `getUserProfile` | 本人或管理員 | 取得使用者個人資料（支援 `includeAvatar` 參數） |
 | `updateUserProfile` | 本人或管理員 | 更新個人資料（username, name, email, theme, timezone, language, filter） |
 
 ### Project User
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
-| `getProjectUsersExtended` | 任何用戶 | 取得專案所有成員的完整使用者物件 |
-| `getAssignableUsersExtended` | 任何用戶 | 取得可指派使用者的完整物件（排除 viewer） |
+| `getProjectUsersExtended` | 任何用戶 | 取得專案所有成員的完整使用者物件（支援 `includeAvatar` 參數） |
+| `getAssignableUsersExtended` | 任何用戶 | 取得可指派使用者的完整物件（支援 `includeAvatar` 參數） |
 
 ## 使用方式
 
@@ -594,6 +600,13 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+**含頭像：**
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getProjectUsersExtended","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
+  http://localhost/jsonrpc.php
+```
+
 **回應：**
 ```json
 {
@@ -605,16 +618,8 @@ curl -u "user:password" -X POST \
       "email": "alice@example.com",
       "role": "app-user",
       "is_active": 1,
-      "project_role": "project-manager"
-    },
-    {
-      "id": 2,
-      "username": "bob",
-      "name": "Bob",
-      "email": "bob@example.com",
-      "role": "app-user",
-      "is_active": 1,
-      "project_role": "project-member"
+      "project_role": "project-manager",
+      "avatar": "base64_encoded_image_or_null"
     }
   ]
 }
@@ -625,6 +630,13 @@ curl -u "user:password" -X POST \
 ```sh
 curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**含頭像：**
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
   http://localhost/jsonrpc.php
 ```
 

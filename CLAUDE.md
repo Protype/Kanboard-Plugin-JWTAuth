@@ -112,12 +112,12 @@ KanproBridge/
 - `reset($userId, $newPassword)` - Reset any user's password (admin only)
 
 **Feature/UserProfile/Model.php** - User profile API:
-- `get($userId)` - Get user profile data
+- `get($userId, $includeAvatar)` - Get user profile data (optionally with avatar)
 - `update($userId, $values)` - Update profile fields (username, name, email, theme, timezone, language, filter)
 
 **Feature/ProjectUser/Model.php** - Extended project user API:
-- `getProjectUsers($projectId)` - Get full user objects for project members
-- `getAssignableUsers($projectId)` - Get full user objects for assignable users (excludes project-viewer)
+- `getProjectUsers($projectId, $includeAvatar)` - Get full user objects for project members
+- `getAssignableUsers($projectId, $includeAvatar)` - Get full user objects for assignable users (excludes project-viewer)
 
 **Schema/** - Database schema migrations:
 - `version_1`: Creates `jwt_revoked_tokens` table
@@ -177,14 +177,14 @@ Token structure includes:
 #### User Profile
 | Method | Parameters | Permission |
 |--------|------------|------------|
-| `getUserProfile` | `userId` | Self or admin |
+| `getUserProfile` | `userId`, `includeAvatar` (optional) | Self or admin |
 | `updateUserProfile` | `userId`, `values` | Self or admin |
 
 #### Project User
 | Method | Parameters | Permission |
 |--------|------------|------------|
-| `getProjectUsersExtended` | `projectId` | Any user |
-| `getAssignableUsersExtended` | `projectId` | Any user |
+| `getProjectUsersExtended` | `projectId`, `includeAvatar` (optional) | Any user |
+| `getAssignableUsersExtended` | `projectId`, `includeAvatar` (optional) | Any user |
 
 ### API Testing
 
@@ -259,6 +259,11 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getUserProfile", "params": {"userId": 1}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
+# User Profile: Get with avatar
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getUserProfile", "params": {"userId": 1, "includeAvatar": true}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
 # User Profile: Update
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "updateUserProfile", "params": {"userId": 1, "values": {"name": "New Name", "theme": "dark", "timezone": "Asia/Taipei"}}, "id": 1}' \
@@ -269,9 +274,19 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getProjectUsersExtended", "params": {"projectId": 1}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
+# Project User: Get all project members with avatars
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getProjectUsersExtended", "params": {"projectId": 1, "includeAvatar": true}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
 # Project User: Get assignable users with full user data
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getAssignableUsersExtended", "params": {"projectId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# Project User: Get assignable users with avatars
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getAssignableUsersExtended", "params": {"projectId": 1, "includeAvatar": true}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 ```
 
