@@ -115,8 +115,9 @@ KanproBridge/
 - `get($userId)` - Get user profile data with avatar
 - `update($userId, $values)` - Update profile fields (username, name, email, theme, timezone, language, filter)
 
-**Feature/ProjectUser/Model.php** - Overrides Kanboard's project user API:
-- `getProjectUsers($projectId)` - Get full user objects with avatar for project members (replaces `{userId: username}` mapping)
+**Feature/ProjectUser/Model.php** - Overrides Kanboard's user listing APIs:
+- `getAllUsers()` - Get all users with avatar
+- `getProjectUsers($projectId)` - Get full user objects with avatar for project members
 - `getAssignableUsers($projectId)` - Get full user objects with avatar for assignable users (excludes project-viewer)
 
 **Schema/** - Database schema migrations:
@@ -183,6 +184,7 @@ Token structure includes:
 #### Project User (overrides Kanboard built-in)
 | Method | Parameters | Permission |
 |--------|------------|------------|
+| `getAllUsers` | - | Any user |
 | `getProjectUsers` | `projectId` | Any user |
 | `getAssignableUsers` | `projectId` | Any user |
 
@@ -262,6 +264,11 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
 # User Profile: Update
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "updateUserProfile", "params": {"userId": 1, "values": {"name": "New Name", "theme": "dark", "timezone": "Asia/Taipei"}}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# Project User: Get all users with avatar (overrides Kanboard built-in)
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getAllUsers", "id": 1}' \
   "http://localhost/jsonrpc.php"
 
 # Project User: Get all project members with full user data + avatar (overrides Kanboard built-in)

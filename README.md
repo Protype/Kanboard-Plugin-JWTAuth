@@ -104,6 +104,7 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 
 | Method | Permission | Description |
 |--------|------------|-------------|
+| `getAllUsers` | Any user | Get all users with avatar |
 | `getProjectUsers` | Any user | Get full user objects with avatar for all project members |
 | `getAssignableUsers` | Any user | Get full user objects with avatar for assignable users |
 
@@ -281,6 +282,31 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+### Get All Users (overrides Kanboard built-in)
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getAllUsers","id":1}' \
+  http://localhost/jsonrpc.php
+```
+
+**Response:**
+```json
+{
+  "result": [
+    {
+      "id": 1,
+      "username": "admin",
+      "name": "Administrator",
+      "email": "admin@example.com",
+      "role": "app-admin",
+      "is_active": 1,
+      "avatar": "base64_encoded_image_or_null"
+    }
+  ]
+}
+```
+
 ### Get Project Users (overrides Kanboard built-in)
 
 ```sh
@@ -437,6 +463,7 @@ API methods require their feature to be enabled first. If you see:
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
+| `getAllUsers` | 任何用戶 | 取得所有使用者（含頭像） |
 | `getProjectUsers` | 任何用戶 | 取得專案所有成員的完整使用者物件（含頭像） |
 | `getAssignableUsers` | 任何用戶 | 取得可指派使用者的完整物件（含頭像） |
 
@@ -612,6 +639,31 @@ curl -u "user:password" -X POST \
 curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"updateUserProfile","id":1,"params":{"userId":1,"values":{"name":"新名稱","theme":"light","timezone":"UTC"}}}' \
   http://localhost/jsonrpc.php
+```
+
+### 取得所有使用者（覆蓋 Kanboard 內建）
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getAllUsers","id":1}' \
+  http://localhost/jsonrpc.php
+```
+
+**回應：**
+```json
+{
+  "result": [
+    {
+      "id": 1,
+      "username": "admin",
+      "name": "Administrator",
+      "email": "admin@example.com",
+      "role": "app-admin",
+      "is_active": 1,
+      "avatar": "base64_encoded_image_or_null"
+    }
+  ]
+}
 ```
 
 ### 取得專案成員（覆蓋 Kanboard 內建）

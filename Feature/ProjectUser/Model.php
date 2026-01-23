@@ -5,9 +5,9 @@ namespace Kanboard\Plugin\KanproBridge\Feature\ProjectUser;
 /**
  * Project User Model
  *
- * Provides extended user information for project members and assignable users.
- * Unlike Kanboard's native getProjectUsers/getAssignableUsers which return
- * only {user_id: username} mapping, these methods return full user objects.
+ * Overrides Kanboard's native user listing APIs to include avatar data.
+ * - getAllUsers: Returns full user objects with avatar
+ * - getProjectUsers/getAssignableUsers: Returns full user objects with avatar and project_role
  */
 class Model
 {
@@ -36,6 +36,37 @@ class Model
     public function __construct($container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * Get all users with avatar data
+     *
+     * Overrides Kanboard's getAllUsers to include avatar.
+     *
+     * @return array Array of user objects with full details and avatar
+     */
+    public function getAllUsers()
+    {
+        $users = $this->container['db']
+            ->table('users')
+            ->findAll();
+
+        $result = [];
+        foreach ($users as $user) {
+            $filteredUser = [];
+            foreach (self::USER_FIELDS as $field) {
+                if (array_key_exists($field, $user)) {
+                    $filteredUser[$field] = $user[$field];
+                }
+            }
+
+            // Always include avatar
+            $filteredUser['avatar'] = $this->getAvatarData($user['id']);
+
+            $result[] = $filteredUser;
+        }
+
+        return $result;
     }
 
     /**
