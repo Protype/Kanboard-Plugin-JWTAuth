@@ -101,6 +101,19 @@
     </div>
   </fieldset>
 
+  <!-- Project User Section -->
+  <fieldset>
+    <legend><?= t('Project User') ?></legend>
+
+    <div class="form-group">
+      <label for="kanpro_project_user_enable">
+        <input type="checkbox" name="kanpro_project_user_enable" value="1" id="kanpro_project_user_enable" class="form-control" <?= ($this->task->configModel->get('kanpro_project_user_enable', '') === '1') ? 'checked' : '' ?>>
+        <?= t('Enable Project User API') ?>
+      </label>
+      <p class="form-help"><?= t('Extended getProjectUsers/getAssignableUsers that return full user objects (id, username, name, email, role, is_active, project_role).') ?></p>
+    </div>
+  </fieldset>
+
   <div class="form-actions">
     <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
   </div>

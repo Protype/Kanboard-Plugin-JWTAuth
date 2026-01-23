@@ -10,6 +10,7 @@ KanproBridge is a multi-functional Kanboard plugin that provides:
 - **User Avatar** upload and retrieval via API
 - **User Password** change and reset via API
 - **User Profile** get and update personal profile fields via API
+- **Project User** extended getProjectUsers/getAssignableUsers returning full user objects
 
 ## Commands
 
@@ -47,8 +48,10 @@ KanproBridge/
 │   │   └── Model.php              # User avatar API
 │   ├── UserPassword/
 │   │   └── Model.php              # User password API
-│   └── UserProfile/
-│       └── Model.php              # User profile API
+│   ├── UserProfile/
+│   │   └── Model.php              # User profile API
+│   └── ProjectUser/
+│       └── Model.php              # Extended project user API
 ├── Controller/
 │   └── ConfigController.php
 ├── Schema/
@@ -75,6 +78,7 @@ KanproBridge/
 - Registers User Avatar API when enabled
 - Registers User Password API when enabled
 - Registers User Profile API when enabled
+- Registers Project User API when enabled
 - Exposes JSON-RPC API methods
 
 **Feature/JWTAuth/Provider.php** - Implements `PasswordAuthenticationProviderInterface`:
@@ -110,6 +114,10 @@ KanproBridge/
 **Feature/UserProfile/Model.php** - User profile API:
 - `get($userId)` - Get user profile data
 - `update($userId, $values)` - Update profile fields (username, name, email, theme, timezone, language, filter)
+
+**Feature/ProjectUser/Model.php** - Extended project user API:
+- `getProjectUsers($projectId)` - Get full user objects for project members
+- `getAssignableUsers($projectId)` - Get full user objects for assignable users (excludes project-viewer)
 
 **Schema/** - Database schema migrations:
 - `version_1`: Creates `jwt_revoked_tokens` table
@@ -171,6 +179,12 @@ Token structure includes:
 |--------|------------|------------|
 | `getUserProfile` | `userId` | Self or admin |
 | `updateUserProfile` | `userId`, `values` | Self or admin |
+
+#### Project User
+| Method | Parameters | Permission |
+|--------|------------|------------|
+| `getProjectUsersExtended` | `projectId` | Any user |
+| `getAssignableUsersExtended` | `projectId` | Any user |
 
 ### API Testing
 
@@ -249,6 +263,16 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "updateUserProfile", "params": {"userId": 1, "values": {"name": "New Name", "theme": "dark", "timezone": "Asia/Taipei"}}, "id": 1}' \
   "http://localhost/jsonrpc.php"
+
+# Project User: Get all project members with full user data
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getProjectUsersExtended", "params": {"projectId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# Project User: Get assignable users with full user data
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getAssignableUsersExtended", "params": {"projectId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
 ```
 
 ### Configuration Keys
@@ -274,6 +298,9 @@ Stored in Kanboard's config model:
 
 **User Profile Settings:**
 - `kanpro_user_profile_enable` - Enable/disable User Profile API
+
+**Project User Settings:**
+- `kanpro_project_user_enable` - Enable/disable Project User API
 
 ### Dependencies
 

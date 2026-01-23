@@ -231,6 +231,27 @@ abstract class Base extends TestCase
             'role' => 'app-user',
             'is_active' => 1,
         ], $profile);
+
+        // Also add to users table in userMetadataStorage for db queries
+        if (!isset($this->userMetadataStorage['users'])) {
+            $this->userMetadataStorage['users'] = [];
+        }
+        $this->userMetadataStorage['users'][] = $this->userStorage[$id];
+    }
+
+    /**
+     * Add a project member for testing
+     */
+    protected function addProjectMember(int $projectId, int $userId, string $role = 'project-member'): void
+    {
+        if (!isset($this->userMetadataStorage['project_has_users'])) {
+            $this->userMetadataStorage['project_has_users'] = [];
+        }
+        $this->userMetadataStorage['project_has_users'][] = [
+            'project_id' => $projectId,
+            'user_id' => $userId,
+            'role' => $role,
+        ];
     }
 
     /**
@@ -376,6 +397,9 @@ class MockDatabase
     private $storage;
     private $currentTable;
     private $conditions = [];
+    private $neqConditions = [];
+    private $inConditions = [];
+    private $selectedColumns = [];
 
     public function __construct(array &$storage)
     {
@@ -386,12 +410,33 @@ class MockDatabase
     {
         $this->currentTable = $tableName;
         $this->conditions = [];
+        $this->neqConditions = [];
+        $this->inConditions = [];
+        $this->selectedColumns = [];
+        return $this;
+    }
+
+    public function columns(...$columns)
+    {
+        $this->selectedColumns = $columns;
         return $this;
     }
 
     public function eq(string $column, $value)
     {
         $this->conditions[$column] = $value;
+        return $this;
+    }
+
+    public function neq(string $column, $value)
+    {
+        $this->neqConditions[$column] = $value;
+        return $this;
+    }
+
+    public function in(string $column, array $values)
+    {
+        $this->inConditions[$column] = $values;
         return $this;
     }
 
@@ -404,14 +449,48 @@ class MockDatabase
         $results = [];
         foreach ($this->storage[$this->currentTable] as $row) {
             $match = true;
+
+            // Check eq conditions
             foreach ($this->conditions as $column => $value) {
                 if (!isset($row[$column]) || $row[$column] !== $value) {
                     $match = false;
                     break;
                 }
             }
+
+            // Check neq conditions
             if ($match) {
-                $results[] = $row;
+                foreach ($this->neqConditions as $column => $value) {
+                    if (isset($row[$column]) && $row[$column] === $value) {
+                        $match = false;
+                        break;
+                    }
+                }
+            }
+
+            // Check in conditions
+            if ($match) {
+                foreach ($this->inConditions as $column => $values) {
+                    if (!isset($row[$column]) || !in_array($row[$column], $values, true)) {
+                        $match = false;
+                        break;
+                    }
+                }
+            }
+
+            if ($match) {
+                // Filter columns if specified
+                if (!empty($this->selectedColumns)) {
+                    $filteredRow = [];
+                    foreach ($this->selectedColumns as $col) {
+                        if (array_key_exists($col, $row)) {
+                            $filteredRow[$col] = $row[$col];
+                        }
+                    }
+                    $results[] = $filteredRow;
+                } else {
+                    $results[] = $row;
+                }
             }
         }
 

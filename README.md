@@ -1,6 +1,6 @@
 # KanproBridge
 
-Multi-functional Kanboard plugin providing JWT authentication, User Metadata, User Avatar, and User Password API.
+Multi-functional Kanboard plugin providing JWT authentication, User Metadata, User Avatar, User Password, User Profile, and Project User API.
 
 ## Features
 
@@ -8,6 +8,8 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 - **User Metadata**: Custom key-value storage per user
 - **User Avatar**: Upload and retrieve avatars via API
 - **User Password**: Change and reset passwords via API
+- **User Profile**: Get and update user profile fields via API
+- **Project User**: Extended getProjectUsers/getAssignableUsers returning full user objects
 
 ## Installation
 
@@ -47,6 +49,12 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 | Setting | Description | Default |
 |---------|-------------|---------|
 | Enable User Profile | Enable/disable User Profile API | Disabled |
+
+### Project User Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable Project User | Enable/disable Project User API | Disabled |
 
 ## API Methods
 
@@ -91,6 +99,13 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 |--------|------------|-------------|
 | `getUserProfile` | Self or Admin | Get user profile data |
 | `updateUserProfile` | Self or Admin | Update profile (username, name, email, theme, timezone, language, filter) |
+
+### Project User
+
+| Method | Permission | Description |
+|--------|------------|-------------|
+| `getProjectUsersExtended` | Any user | Get full user objects for all project members |
+| `getAssignableUsersExtended` | Any user | Get full user objects for assignable users (excludes viewers) |
 
 ## Usage
 
@@ -248,6 +263,50 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
+### Get Project Users (Extended)
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getProjectUsersExtended","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**Response:**
+```json
+{
+  "result": [
+    {
+      "id": 1,
+      "username": "alice",
+      "name": "Alice",
+      "email": "alice@example.com",
+      "role": "app-user",
+      "is_active": 1,
+      "project_role": "project-manager"
+    },
+    {
+      "id": 2,
+      "username": "bob",
+      "name": "Bob",
+      "email": "bob@example.com",
+      "role": "app-user",
+      "is_active": 1,
+      "project_role": "project-member"
+    }
+  ]
+}
+```
+
+### Get Assignable Users (Extended)
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**Note:** This method excludes users with `project-viewer` role.
+
 ## Troubleshooting
 
 ### "Method not found" Error
@@ -264,7 +323,7 @@ API methods require their feature to be enabled first. If you see:
 
 # KanproBridge (繁體中文)
 
-多功能 Kanboard 外掛，提供 JWT 認證、使用者 Metadata、頭像、密碼與個人資料 API。
+多功能 Kanboard 外掛，提供 JWT 認證、使用者 Metadata、頭像、密碼、個人資料與專案成員 API。
 
 ## 功能
 
@@ -273,6 +332,7 @@ API methods require their feature to be enabled first. If you see:
 - **User Avatar**：透過 API 上傳與取得頭像
 - **User Password**：透過 API 更改與重設密碼
 - **User Profile**：透過 API 取得與更新個人資料
+- **Project User**：擴充版 getProjectUsers/getAssignableUsers，回傳完整使用者物件
 
 ## 安裝
 
@@ -312,6 +372,12 @@ API methods require their feature to be enabled first. If you see:
 | 設定 | 說明 | 預設值 |
 |-----|------|-------|
 | 啟用 User Profile | 啟用/停用 User Profile API | 停用 |
+
+### Project User 設定
+
+| 設定 | 說明 | 預設值 |
+|-----|------|-------|
+| 啟用 Project User | 啟用/停用 Project User API | 停用 |
 
 ## API 方法
 
@@ -356,6 +422,13 @@ API methods require their feature to be enabled first. If you see:
 |-----|------|-----|
 | `getUserProfile` | 本人或管理員 | 取得使用者個人資料 |
 | `updateUserProfile` | 本人或管理員 | 更新個人資料（username, name, email, theme, timezone, language, filter） |
+
+### Project User
+
+| 方法 | 權限 | 說明 |
+|-----|------|-----|
+| `getProjectUsersExtended` | 任何用戶 | 取得專案所有成員的完整使用者物件 |
+| `getAssignableUsersExtended` | 任何用戶 | 取得可指派使用者的完整物件（排除 viewer） |
 
 ## 使用方式
 
@@ -512,6 +585,50 @@ curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"updateUserProfile","id":1,"params":{"userId":1,"values":{"name":"新名稱","theme":"light","timezone":"UTC"}}}' \
   http://localhost/jsonrpc.php
 ```
+
+### 取得專案成員（擴充版）
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getProjectUsersExtended","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**回應：**
+```json
+{
+  "result": [
+    {
+      "id": 1,
+      "username": "alice",
+      "name": "Alice",
+      "email": "alice@example.com",
+      "role": "app-user",
+      "is_active": 1,
+      "project_role": "project-manager"
+    },
+    {
+      "id": 2,
+      "username": "bob",
+      "name": "Bob",
+      "email": "bob@example.com",
+      "role": "app-user",
+      "is_active": 1,
+      "project_role": "project-member"
+    }
+  ]
+}
+```
+
+### 取得可指派使用者（擴充版）
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getAssignableUsersExtended","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**注意：** 此方法會排除 `project-viewer` 角色的使用者。
 
 ## 疑難排解
 

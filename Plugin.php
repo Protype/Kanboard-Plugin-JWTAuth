@@ -9,6 +9,7 @@ use Kanboard\Plugin\KanproBridge\Feature\UserMetadata\Model as UserMetadataModel
 use Kanboard\Plugin\KanproBridge\Feature\UserAvatar\Model as UserAvatarModel;
 use Kanboard\Plugin\KanproBridge\Feature\UserPassword\Model as UserPasswordModel;
 use Kanboard\Plugin\KanproBridge\Feature\UserProfile\Model as UserProfileModel;
+use Kanboard\Plugin\KanproBridge\Feature\ProjectUser\Model as ProjectUserModel;
 
 /**
  * KanproBridge Plugin for Kanboard
@@ -52,6 +53,10 @@ class Plugin extends Base
       return new UserProfileModel($c);
     };
 
+    $this->container['projectUserModel'] = function ($c) {
+      return new ProjectUserModel($c);
+    };
+
     if ($this->configModel->get('jwt_enable', '') === '1') {
       $this->handleApiAuthHeader();
       $this->registerJWTAuthentication();
@@ -71,6 +76,10 @@ class Plugin extends Base
 
     if ($this->configModel->get('kanpro_user_profile_enable', '') === '1') {
       $this->registerUserProfileApi();
+    }
+
+    if ($this->configModel->get('kanpro_project_user_enable', '') === '1') {
+      $this->registerProjectUserApi();
     }
   }
 
@@ -213,6 +222,18 @@ class Plugin extends Base
   }
 
   /**
+   * Register Project User API methods
+   */
+  private function registerProjectUserApi()
+  {
+    $model = $this->container['projectUserModel'];
+    $procedureHandler = $this->api->getProcedureHandler();
+
+    $procedureHandler->withClassAndMethod('getProjectUsersExtended', $model, 'getProjectUsers');
+    $procedureHandler->withClassAndMethod('getAssignableUsersExtended', $model, 'getAssignableUsers');
+  }
+
+  /**
    * Get plugin name
    */
   public function getPluginName()
@@ -262,6 +283,7 @@ class Plugin extends Base
     $userAvatarEnabled = $this->configModel->get('kanpro_user_avatar_enable', '') === '1';
     $userPasswordEnabled = $this->configModel->get('kanpro_user_password_enable', '') === '1';
     $userProfileEnabled = $this->configModel->get('kanpro_user_profile_enable', '') === '1';
+    $projectUserEnabled = $this->configModel->get('kanpro_project_user_enable', '') === '1';
 
     return [
       'name' => $this->getPluginName(),
@@ -308,6 +330,13 @@ class Plugin extends Base
           'methods' => [
             ['name' => 'getUserProfile', 'description' => 'Get user profile data'],
             ['name' => 'updateUserProfile', 'description' => 'Update user profile fields'],
+          ],
+        ],
+        'project_user' => [
+          'enabled' => $projectUserEnabled,
+          'methods' => [
+            ['name' => 'getProjectUsersExtended', 'description' => 'Get full user objects for project members'],
+            ['name' => 'getAssignableUsersExtended', 'description' => 'Get full user objects for assignable users'],
           ],
         ],
       ],
