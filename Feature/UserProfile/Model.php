@@ -82,10 +82,9 @@ class Model
      * Get user profile
      *
      * @param int $userId User ID
-     * @param bool $includeAvatar Whether to include avatar data (base64)
-     * @return array|false Profile data or false if access denied
+     * @return array|false Profile data with avatar or false if access denied
      */
-    public function get($userId, $includeAvatar = false)
+    public function get($userId)
     {
         if (!$this->canAccess($userId)) {
             return false;
@@ -104,10 +103,8 @@ class Model
             }
         }
 
-        // Include avatar if requested
-        if ($includeAvatar) {
-            $profile['avatar'] = $this->getAvatarData($userId);
-        }
+        // Always include avatar
+        $profile['avatar'] = $this->getAvatarData($userId);
 
         return $profile;
     }

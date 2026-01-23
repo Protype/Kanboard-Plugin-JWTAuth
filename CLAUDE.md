@@ -112,7 +112,7 @@ KanproBridge/
 - `reset($userId, $newPassword)` - Reset any user's password (admin only)
 
 **Feature/UserProfile/Model.php** - User profile API:
-- `get($userId, $includeAvatar)` - Get user profile data (optionally with avatar)
+- `get($userId)` - Get user profile data with avatar
 - `update($userId, $values)` - Update profile fields (username, name, email, theme, timezone, language, filter)
 
 **Feature/ProjectUser/Model.php** - Overrides Kanboard's project user API:
@@ -177,7 +177,7 @@ Token structure includes:
 #### User Profile
 | Method | Parameters | Permission |
 |--------|------------|------------|
-| `getUserProfile` | `userId`, `includeAvatar` (optional) | Self or admin |
+| `getUserProfile` | `userId` | Self or admin |
 | `updateUserProfile` | `userId`, `values` | Self or admin |
 
 #### Project User (overrides Kanboard built-in)
@@ -254,14 +254,9 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "resetUserPassword", "params": {"userId": 1, "newPassword": "resetpass"}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
-# User Profile: Get
+# User Profile: Get (includes avatar)
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getUserProfile", "params": {"userId": 1}, "id": 1}' \
-  "http://localhost/jsonrpc.php"
-
-# User Profile: Get with avatar
-curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "getUserProfile", "params": {"userId": 1, "includeAvatar": true}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
 # User Profile: Update

@@ -97,7 +97,7 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 
 | Method | Permission | Description |
 |--------|------------|-------------|
-| `getUserProfile` | Self or Admin | Get user profile data (supports `includeAvatar` param) |
+| `getUserProfile` | Self or Admin | Get user profile data with avatar |
 | `updateUserProfile` | Self or Admin | Update profile (username, name, email, theme, timezone, language, filter) |
 
 ### Project User (overrides Kanboard built-in)
@@ -412,7 +412,7 @@ API methods require their feature to be enabled first. If you see:
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
-| `getUserProfile` | 本人或管理員 | 取得使用者個人資料（支援 `includeAvatar` 參數） |
+| `getUserProfile` | 本人或管理員 | 取得使用者個人資料（含頭像） |
 | `updateUserProfile` | 本人或管理員 | 更新個人資料（username, name, email, theme, timezone, language, filter） |
 
 ### Project User（覆蓋 Kanboard 內建）
