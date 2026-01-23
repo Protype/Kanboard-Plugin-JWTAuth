@@ -123,11 +123,29 @@ curl -u "user:password" -X POST \
   "result": {
     "name": "KanproBridge",
     "version": "2.3.0",
-    "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
-    "features": {...}
+    "description": "...",
+    "features": {
+      "jwt_auth": {"enabled": true, "methods": [...]},
+      "user_metadata": {"enabled": true, "methods": [...]},
+      "user_avatar": {"enabled": true, "methods": [...]},
+      "user_password": {"enabled": true, "methods": [...]},
+      "user_profile": {"enabled": true, "methods": [...]},
+      "project_user": {"enabled": true, "methods": [...]}
+    }
   }
 }
 ```
+
+**Feature Keys:**
+
+| Key | Config Setting | Description |
+|-----|----------------|-------------|
+| `jwt_auth` | `jwt_enable` | JWT authentication (access + refresh tokens) |
+| `user_metadata` | `kanpro_user_metadata_enable` | Custom key-value storage per user |
+| `user_avatar` | `kanpro_user_avatar_enable` | Avatar upload/retrieve API |
+| `user_password` | `kanpro_user_password_enable` | Password change/reset API |
+| `user_profile` | `kanpro_user_profile_enable` | Profile get/update API (includes avatar) |
+| `project_user` | `kanpro_project_user_enable` | Overrides getProjectUsers/getAssignableUsers |
 
 ### Get Token
 
@@ -438,11 +456,29 @@ curl -u "user:password" -X POST \
   "result": {
     "name": "KanproBridge",
     "version": "2.3.0",
-    "description": "Multi-functional bridge plugin connecting Kanboard and Kanpro interface systems",
-    "features": {...}
+    "description": "...",
+    "features": {
+      "jwt_auth": {"enabled": true, "methods": [...]},
+      "user_metadata": {"enabled": true, "methods": [...]},
+      "user_avatar": {"enabled": true, "methods": [...]},
+      "user_password": {"enabled": true, "methods": [...]},
+      "user_profile": {"enabled": true, "methods": [...]},
+      "project_user": {"enabled": true, "methods": [...]}
+    }
   }
 }
 ```
+
+**Feature Keys：**
+
+| Key | 設定項目 | 說明 |
+|-----|---------|------|
+| `jwt_auth` | `jwt_enable` | JWT 認證（access + refresh tokens） |
+| `user_metadata` | `kanpro_user_metadata_enable` | 使用者自訂 key-value 儲存 |
+| `user_avatar` | `kanpro_user_avatar_enable` | 頭像上傳/取得 API |
+| `user_password` | `kanpro_user_password_enable` | 密碼變更/重設 API |
+| `user_profile` | `kanpro_user_profile_enable` | 個人資料 API（含頭像） |
+| `project_user` | `kanpro_project_user_enable` | 覆蓋 getProjectUsers/getAssignableUsers |
 
 ### 取得 Token
 
