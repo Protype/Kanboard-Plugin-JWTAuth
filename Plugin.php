@@ -37,23 +37,23 @@ class Plugin extends Base
       return new RevokedTokenModel($c['db']);
     };
 
-    $this->container['userMetadataModel'] = function ($c) {
+    $this->container['kanproUserMetadataModel'] = function ($c) {
       return new UserMetadataModel($c);
     };
 
-    $this->container['userAvatarModel'] = function ($c) {
+    $this->container['kanproUserAvatarModel'] = function ($c) {
       return new UserAvatarModel($c);
     };
 
-    $this->container['userPasswordModel'] = function ($c) {
+    $this->container['kanproUserPasswordModel'] = function ($c) {
       return new UserPasswordModel($c);
     };
 
-    $this->container['userProfileModel'] = function ($c) {
+    $this->container['kanproUserProfileModel'] = function ($c) {
       return new UserProfileModel($c);
     };
 
-    $this->container['projectUserModel'] = function ($c) {
+    $this->container['kanproProjectUserModel'] = function ($c) {
       return new ProjectUserModel($c);
     };
 
@@ -175,7 +175,7 @@ class Plugin extends Base
    */
   private function registerUserMetadataApi()
   {
-    $model = $this->container['userMetadataModel'];
+    $model = $this->container['kanproUserMetadataModel'];
     $procedureHandler = $this->api->getProcedureHandler();
 
     $procedureHandler->withClassAndMethod('getUserMetadata', $model, 'getAll');
@@ -189,7 +189,7 @@ class Plugin extends Base
    */
   private function registerUserAvatarApi()
   {
-    $model = $this->container['userAvatarModel'];
+    $model = $this->container['kanproUserAvatarModel'];
     $procedureHandler = $this->api->getProcedureHandler();
 
     $procedureHandler->withClassAndMethod('uploadUserAvatar', $model, 'upload');
@@ -202,7 +202,7 @@ class Plugin extends Base
    */
   private function registerUserPasswordApi()
   {
-    $model = $this->container['userPasswordModel'];
+    $model = $this->container['kanproUserPasswordModel'];
     $procedureHandler = $this->api->getProcedureHandler();
 
     $procedureHandler->withClassAndMethod('changeUserPassword', $model, 'change');
@@ -214,7 +214,7 @@ class Plugin extends Base
    */
   private function registerUserProfileApi()
   {
-    $model = $this->container['userProfileModel'];
+    $model = $this->container['kanproUserProfileModel'];
     $procedureHandler = $this->api->getProcedureHandler();
 
     $procedureHandler->withClassAndMethod('getUserProfile', $model, 'get');
@@ -226,7 +226,7 @@ class Plugin extends Base
    */
   private function registerProjectUserApi()
   {
-    $model = $this->container['projectUserModel'];
+    $model = $this->container['kanproProjectUserModel'];
     $procedureHandler = $this->api->getProcedureHandler();
 
     $procedureHandler->withClassAndMethod('getProjectUsersExtended', $model, 'getProjectUsers');
