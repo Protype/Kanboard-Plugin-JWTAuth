@@ -42,12 +42,12 @@ class Model
      * Get extended user data for project members
      *
      * Returns full user objects for all project members (all roles).
+     * Includes avatar data (base64) for each user.
      *
      * @param int $projectId Project ID
-     * @param bool $includeAvatar Whether to include avatar data (base64)
-     * @return array Array of user objects with full details
+     * @return array Array of user objects with full details and avatar
      */
-    public function getProjectUsers($projectId, $includeAvatar = false)
+    public function getProjectUsers($projectId)
     {
         // Get project member user IDs from project_has_users table
         $members = $this->container['db']
@@ -63,7 +63,7 @@ class Model
         $userIds = array_column($members, 'user_id');
         $projectRoles = array_column($members, 'role', 'user_id');
 
-        return $this->getUsersByIds($userIds, $projectRoles, $includeAvatar);
+        return $this->getUsersByIds($userIds, $projectRoles);
     }
 
     /**
@@ -71,12 +71,12 @@ class Model
      *
      * Returns full user objects for users who can be assigned to tasks.
      * Excludes users with viewer-only roles.
+     * Includes avatar data (base64) for each user.
      *
      * @param int $projectId Project ID
-     * @param bool $includeAvatar Whether to include avatar data (base64)
-     * @return array Array of user objects with full details
+     * @return array Array of user objects with full details and avatar
      */
-    public function getAssignableUsers($projectId, $includeAvatar = false)
+    public function getAssignableUsers($projectId)
     {
         // Get assignable user IDs (excludes project-viewer role)
         $members = $this->container['db']
@@ -93,7 +93,7 @@ class Model
         $userIds = array_column($members, 'user_id');
         $projectRoles = array_column($members, 'role', 'user_id');
 
-        return $this->getUsersByIds($userIds, $projectRoles, $includeAvatar);
+        return $this->getUsersByIds($userIds, $projectRoles);
     }
 
     /**
@@ -101,10 +101,9 @@ class Model
      *
      * @param array $userIds Array of user IDs
      * @param array $projectRoles Optional array of project roles keyed by user_id
-     * @param bool $includeAvatar Whether to include avatar data
      * @return array Array of user objects
      */
-    private function getUsersByIds(array $userIds, array $projectRoles = [], $includeAvatar = false)
+    private function getUsersByIds(array $userIds, array $projectRoles = [])
     {
         if (empty($userIds)) {
             return [];
@@ -129,10 +128,8 @@ class Model
                 $filteredUser['project_role'] = $projectRoles[$user['id']];
             }
 
-            // Add avatar if requested
-            if ($includeAvatar) {
-                $filteredUser['avatar'] = $this->getAvatarData($user['id']);
-            }
+            // Always include avatar
+            $filteredUser['avatar'] = $this->getAvatarData($user['id']);
 
             $result[] = $filteredUser;
         }

@@ -116,6 +116,7 @@ class ModelTest extends Base
         $this->assertArrayHasKey('role', $user);
         $this->assertArrayHasKey('is_active', $user);
         $this->assertArrayHasKey('project_role', $user);
+        $this->assertArrayHasKey('avatar', $user);
     }
 
     // ========================================

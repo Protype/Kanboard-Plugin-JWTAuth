@@ -104,8 +104,8 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 
 | Method | Permission | Description |
 |--------|------------|-------------|
-| `getProjectUsers` | Any user | Get full user objects for all project members (supports `includeAvatar` param) |
-| `getAssignableUsers` | Any user | Get full user objects for assignable users (supports `includeAvatar` param) |
+| `getProjectUsers` | Any user | Get full user objects with avatar for all project members |
+| `getAssignableUsers` | Any user | Get full user objects with avatar for assignable users |
 
 ## Usage
 
@@ -271,13 +271,6 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
-**With avatars:**
-```sh
-curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getProjectUsers","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
-  http://localhost/jsonrpc.php
-```
-
 **Response:**
 ```json
 {
@@ -301,13 +294,6 @@ curl -u "user:password" -X POST \
 ```sh
 curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"getAssignableUsers","id":1,"params":{"projectId":1}}' \
-  http://localhost/jsonrpc.php
-```
-
-**With avatars:**
-```sh
-curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getAssignableUsers","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
   http://localhost/jsonrpc.php
 ```
 
@@ -433,8 +419,8 @@ API methods require their feature to be enabled first. If you see:
 
 | 方法 | 權限 | 說明 |
 |-----|------|-----|
-| `getProjectUsers` | 任何用戶 | 取得專案所有成員的完整使用者物件（支援 `includeAvatar` 參數） |
-| `getAssignableUsers` | 任何用戶 | 取得可指派使用者的完整物件（支援 `includeAvatar` 參數） |
+| `getProjectUsers` | 任何用戶 | 取得專案所有成員的完整使用者物件（含頭像） |
+| `getAssignableUsers` | 任何用戶 | 取得可指派使用者的完整物件（含頭像） |
 
 ## 使用方式
 
@@ -600,13 +586,6 @@ curl -u "user:password" -X POST \
   http://localhost/jsonrpc.php
 ```
 
-**含頭像：**
-```sh
-curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getProjectUsers","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
-  http://localhost/jsonrpc.php
-```
-
 **回應：**
 ```json
 {
@@ -630,13 +609,6 @@ curl -u "user:password" -X POST \
 ```sh
 curl -u "user:password" -X POST \
   -d '{"jsonrpc":"2.0","method":"getAssignableUsers","id":1,"params":{"projectId":1}}' \
-  http://localhost/jsonrpc.php
-```
-
-**含頭像：**
-```sh
-curl -u "user:password" -X POST \
-  -d '{"jsonrpc":"2.0","method":"getAssignableUsers","id":1,"params":{"projectId":1,"includeAvatar":true}}' \
   http://localhost/jsonrpc.php
 ```
 

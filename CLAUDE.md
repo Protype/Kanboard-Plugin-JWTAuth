@@ -116,8 +116,8 @@ KanproBridge/
 - `update($userId, $values)` - Update profile fields (username, name, email, theme, timezone, language, filter)
 
 **Feature/ProjectUser/Model.php** - Overrides Kanboard's project user API:
-- `getProjectUsers($projectId, $includeAvatar)` - Get full user objects for project members (replaces `{userId: username}` mapping)
-- `getAssignableUsers($projectId, $includeAvatar)` - Get full user objects for assignable users (excludes project-viewer)
+- `getProjectUsers($projectId)` - Get full user objects with avatar for project members (replaces `{userId: username}` mapping)
+- `getAssignableUsers($projectId)` - Get full user objects with avatar for assignable users (excludes project-viewer)
 
 **Schema/** - Database schema migrations:
 - `version_1`: Creates `jwt_revoked_tokens` table
@@ -183,8 +183,8 @@ Token structure includes:
 #### Project User (overrides Kanboard built-in)
 | Method | Parameters | Permission |
 |--------|------------|------------|
-| `getProjectUsers` | `projectId`, `includeAvatar` (optional) | Any user |
-| `getAssignableUsers` | `projectId`, `includeAvatar` (optional) | Any user |
+| `getProjectUsers` | `projectId` | Any user |
+| `getAssignableUsers` | `projectId` | Any user |
 
 ### API Testing
 
@@ -269,24 +269,14 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "updateUserProfile", "params": {"userId": 1, "values": {"name": "New Name", "theme": "dark", "timezone": "Asia/Taipei"}}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
-# Project User: Get all project members with full user data (overrides Kanboard built-in)
+# Project User: Get all project members with full user data + avatar (overrides Kanboard built-in)
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getProjectUsers", "params": {"projectId": 1}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 
-# Project User: Get all project members with avatars
-curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "getProjectUsers", "params": {"projectId": 1, "includeAvatar": true}, "id": 1}' \
-  "http://localhost/jsonrpc.php"
-
-# Project User: Get assignable users with full user data (overrides Kanboard built-in)
+# Project User: Get assignable users with full user data + avatar (overrides Kanboard built-in)
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getAssignableUsers", "params": {"projectId": 1}, "id": 1}' \
-  "http://localhost/jsonrpc.php"
-
-# Project User: Get assignable users with avatars
-curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "getAssignableUsers", "params": {"projectId": 1, "includeAvatar": true}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 ```
 
