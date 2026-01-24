@@ -56,6 +56,12 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 |---------|-------------|---------|
 | Enable Project User | Enable/disable Project User API | Disabled |
 
+### Project Roles Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable Project Roles | Enable/disable Project Roles API | Disabled |
+
 ## API Methods
 
 ### JWT Authentication
@@ -108,6 +114,12 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 | `getProjectUsers` | Any user | Get full user objects with avatar for all project members |
 | `getAssignableUsers` | Any user | Get full user objects with avatar for assignable users |
 
+### Project Roles (overrides Kanboard built-in)
+
+| Method | Permission | Description |
+|--------|------------|-------------|
+| `getProjectRoles` | Any user | Get project roles including custom roles |
+
 ## Usage
 
 ### Get Plugin Info
@@ -147,6 +159,7 @@ curl -u "user:password" -X POST \
 | `user_password` | `kanpro_user_password_enable` | Password change/reset API |
 | `user_profile` | `kanpro_user_profile_enable` | Profile get/update API (includes avatar) |
 | `project_user` | `kanpro_project_user_enable` | Overrides getProjectUsers/getAssignableUsers |
+| `project_roles` | `kanpro_project_roles_enable` | Overrides getProjectRoles to include custom roles |
 
 ### Get Token
 
@@ -343,6 +356,28 @@ curl -u "user:password" -X POST \
 
 **Note:** This method excludes users with `project-viewer` role.
 
+### Get Project Roles (overrides Kanboard built-in)
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getProjectRoles","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**Response:**
+```json
+{
+  "result": {
+    "project-manager": "Project Manager",
+    "project-member": "Project Member",
+    "project-viewer": "Project Viewer",
+    "custom-role": "custom-role"
+  }
+}
+```
+
+**Note:** Includes built-in roles plus any custom roles defined for the project.
+
 ## Troubleshooting
 
 ### "Method not found" Error
@@ -415,6 +450,12 @@ API methods require their feature to be enabled first. If you see:
 |-----|------|-------|
 | 啟用 Project User | 啟用/停用 Project User API | 停用 |
 
+### Project Roles 設定
+
+| 設定 | 說明 | 預設值 |
+|-----|------|-------|
+| 啟用 Project Roles | 啟用/停用 Project Roles API | 停用 |
+
 ## API 方法
 
 ### JWT 認證
@@ -467,6 +508,12 @@ API methods require their feature to be enabled first. If you see:
 | `getProjectUsers` | 任何用戶 | 取得專案所有成員的完整使用者物件（含頭像） |
 | `getAssignableUsers` | 任何用戶 | 取得可指派使用者的完整物件（含頭像） |
 
+### Project Roles（覆蓋 Kanboard 內建）
+
+| 方法 | 權限 | 說明 |
+|-----|------|-----|
+| `getProjectRoles` | 任何用戶 | 取得專案角色（含自訂角色） |
+
 ## 使用方式
 
 ### 取得外掛資訊
@@ -506,6 +553,7 @@ curl -u "user:password" -X POST \
 | `user_password` | `kanpro_user_password_enable` | 密碼變更/重設 API |
 | `user_profile` | `kanpro_user_profile_enable` | 個人資料 API（含頭像） |
 | `project_user` | `kanpro_project_user_enable` | 覆蓋 getProjectUsers/getAssignableUsers |
+| `project_roles` | `kanpro_project_roles_enable` | 覆蓋 getProjectRoles 提供自訂角色 |
 
 ### 取得 Token
 
@@ -701,6 +749,28 @@ curl -u "user:password" -X POST \
 ```
 
 **注意：** 此方法會排除 `project-viewer` 角色的使用者。
+
+### 取得專案角色（覆蓋 Kanboard 內建）
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getProjectRoles","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**回應：**
+```json
+{
+  "result": {
+    "project-manager": "Project Manager",
+    "project-member": "Project Member",
+    "project-viewer": "Project Viewer",
+    "custom-role": "custom-role"
+  }
+}
+```
+
+**注意：** 包含內建角色及專案中定義的自訂角色。
 
 ## 疑難排解
 

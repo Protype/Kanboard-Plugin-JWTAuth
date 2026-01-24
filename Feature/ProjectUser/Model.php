@@ -39,6 +39,46 @@ class Model
     }
 
     /**
+     * Built-in project roles
+     */
+    const BUILT_IN_ROLES = [
+        'project-manager' => 'Project Manager',
+        'project-member' => 'Project Member',
+        'project-viewer' => 'Project Viewer',
+    ];
+
+    /**
+     * Get project roles including custom roles
+     *
+     * Overrides Kanboard's getProjectRoles to include custom roles
+     * defined in project_has_roles table.
+     *
+     * @param int $projectId Project ID
+     * @return array Dictionary of role_id => role_name
+     */
+    public function getProjectRoles($projectId)
+    {
+        // Start with built-in roles
+        $roles = self::BUILT_IN_ROLES;
+
+        // Get custom roles from project_has_roles table
+        $customRoles = $this->container['db']
+            ->table('project_has_roles')
+            ->columns('role')
+            ->eq('project_id', $projectId)
+            ->findAll();
+
+        // Add custom roles to the result
+        foreach ($customRoles as $customRole) {
+            $roleId = $customRole['role'];
+            // Custom roles use their name as both key and display name
+            $roles[$roleId] = $roleId;
+        }
+
+        return $roles;
+    }
+
+    /**
      * Get all users with avatar data
      *
      * Overrides Kanboard's getAllUsers to include avatar.

@@ -79,6 +79,7 @@ KanproBridge/
 - Registers User Password API when enabled
 - Registers User Profile API when enabled
 - Registers Project User API when enabled
+- Registers Project Roles API when enabled
 - Exposes JSON-RPC API methods
 
 **Feature/JWTAuth/Provider.php** - Implements `PasswordAuthenticationProviderInterface`:
@@ -119,6 +120,7 @@ KanproBridge/
 - `getAllUsers()` - Get all users with avatar
 - `getProjectUsers($projectId)` - Get full user objects with avatar for project members
 - `getAssignableUsers($projectId)` - Get full user objects with avatar for assignable users (excludes project-viewer)
+- `getProjectRoles($projectId)` - Get project roles including custom roles
 
 **Schema/** - Database schema migrations:
 - `version_1`: Creates `jwt_revoked_tokens` table
@@ -187,6 +189,11 @@ Token structure includes:
 | `getAllUsers` | - | Any user |
 | `getProjectUsers` | `projectId` | Any user |
 | `getAssignableUsers` | `projectId` | Any user |
+
+#### Project Roles (overrides Kanboard built-in)
+| Method | Parameters | Permission |
+|--------|------------|------------|
+| `getProjectRoles` | `projectId` | Any user |
 
 ### API Testing
 
@@ -280,6 +287,11 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getAssignableUsers", "params": {"projectId": 1}, "id": 1}' \
   "http://localhost/jsonrpc.php"
+
+# Project User: Get project roles including custom roles (overrides Kanboard built-in)
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getProjectRoles", "params": {"projectId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
 ```
 
 ### Configuration Keys
@@ -308,6 +320,9 @@ Stored in Kanboard's config model:
 
 **Project User Settings:**
 - `kanpro_project_user_enable` - Enable/disable Project User API
+
+**Project Roles Settings:**
+- `kanpro_project_roles_enable` - Enable/disable Project Roles API
 
 ### Dependencies
 
