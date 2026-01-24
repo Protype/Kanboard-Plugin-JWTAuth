@@ -119,6 +119,7 @@ KanproBridge/
 - `getAllUsers()` - Get all users with avatar
 - `getProjectUsers($projectId)` - Get full user objects with avatar for project members
 - `getAssignableUsers($projectId)` - Get full user objects with avatar for assignable users (excludes project-viewer)
+- `getProjectRoles($projectId)` - Get project roles including custom roles
 
 **Schema/** - Database schema migrations:
 - `version_1`: Creates `jwt_revoked_tokens` table
@@ -187,6 +188,7 @@ Token structure includes:
 | `getAllUsers` | - | Any user |
 | `getProjectUsers` | `projectId` | Any user |
 | `getAssignableUsers` | `projectId` | Any user |
+| `getProjectRoles` | `projectId` | Any user |
 
 ### API Testing
 
@@ -279,6 +281,11 @@ curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
 # Project User: Get assignable users with full user data + avatar (overrides Kanboard built-in)
 curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "getAssignableUsers", "params": {"projectId": 1}, "id": 1}' \
+  "http://localhost/jsonrpc.php"
+
+# Project User: Get project roles including custom roles (overrides Kanboard built-in)
+curl -X POST -u "admin:admin" -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "getProjectRoles", "params": {"projectId": 1}, "id": 1}' \
   "http://localhost/jsonrpc.php"
 ```
 

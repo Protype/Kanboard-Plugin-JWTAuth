@@ -107,6 +107,7 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 | `getAllUsers` | Any user | Get all users with avatar |
 | `getProjectUsers` | Any user | Get full user objects with avatar for all project members |
 | `getAssignableUsers` | Any user | Get full user objects with avatar for assignable users |
+| `getProjectRoles` | Any user | Get project roles including custom roles |
 
 ## Usage
 
@@ -343,6 +344,28 @@ curl -u "user:password" -X POST \
 
 **Note:** This method excludes users with `project-viewer` role.
 
+### Get Project Roles (overrides Kanboard built-in)
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getProjectRoles","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**Response:**
+```json
+{
+  "result": {
+    "project-manager": "Project Manager",
+    "project-member": "Project Member",
+    "project-viewer": "Project Viewer",
+    "custom-role": "custom-role"
+  }
+}
+```
+
+**Note:** Includes built-in roles plus any custom roles defined for the project.
+
 ## Troubleshooting
 
 ### "Method not found" Error
@@ -466,6 +489,7 @@ API methods require their feature to be enabled first. If you see:
 | `getAllUsers` | 任何用戶 | 取得所有使用者（含頭像） |
 | `getProjectUsers` | 任何用戶 | 取得專案所有成員的完整使用者物件（含頭像） |
 | `getAssignableUsers` | 任何用戶 | 取得可指派使用者的完整物件（含頭像） |
+| `getProjectRoles` | 任何用戶 | 取得專案角色（含自訂角色） |
 
 ## 使用方式
 
@@ -701,6 +725,28 @@ curl -u "user:password" -X POST \
 ```
 
 **注意：** 此方法會排除 `project-viewer` 角色的使用者。
+
+### 取得專案角色（覆蓋 Kanboard 內建）
+
+```sh
+curl -u "user:password" -X POST \
+  -d '{"jsonrpc":"2.0","method":"getProjectRoles","id":1,"params":{"projectId":1}}' \
+  http://localhost/jsonrpc.php
+```
+
+**回應：**
+```json
+{
+  "result": {
+    "project-manager": "Project Manager",
+    "project-member": "Project Member",
+    "project-viewer": "Project Viewer",
+    "custom-role": "custom-role"
+  }
+}
+```
+
+**注意：** 包含內建角色及專案中定義的自訂角色。
 
 ## 疑難排解
 

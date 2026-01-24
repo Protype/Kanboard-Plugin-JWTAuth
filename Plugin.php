@@ -234,6 +234,7 @@ class Plugin extends Base
     $procedureHandler->withClassAndMethod('getAllUsers', $model, 'getAllUsers');
     $procedureHandler->withClassAndMethod('getProjectUsers', $model, 'getProjectUsers');
     $procedureHandler->withClassAndMethod('getAssignableUsers', $model, 'getAssignableUsers');
+    $procedureHandler->withClassAndMethod('getProjectRoles', $model, 'getProjectRoles');
   }
 
   /**
@@ -341,6 +342,7 @@ class Plugin extends Base
             ['name' => 'getAllUsers', 'description' => 'Get all users with avatar (overrides Kanboard built-in)'],
             ['name' => 'getProjectUsers', 'description' => 'Get full user objects for project members (overrides Kanboard built-in)'],
             ['name' => 'getAssignableUsers', 'description' => 'Get full user objects for assignable users (overrides Kanboard built-in)'],
+            ['name' => 'getProjectRoles', 'description' => 'Get project roles including custom roles (overrides Kanboard built-in)'],
           ],
         ],
       ],
