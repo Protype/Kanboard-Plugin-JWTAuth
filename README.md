@@ -56,6 +56,12 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 |---------|-------------|---------|
 | Enable Project User | Enable/disable Project User API | Disabled |
 
+### Project Roles Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable Project Roles | Enable/disable Project Roles API | Disabled |
+
 ## API Methods
 
 ### JWT Authentication
@@ -107,6 +113,11 @@ Multi-functional Kanboard plugin providing JWT authentication, User Metadata, Us
 | `getAllUsers` | Any user | Get all users with avatar |
 | `getProjectUsers` | Any user | Get full user objects with avatar for all project members |
 | `getAssignableUsers` | Any user | Get full user objects with avatar for assignable users |
+
+### Project Roles (overrides Kanboard built-in)
+
+| Method | Permission | Description |
+|--------|------------|-------------|
 | `getProjectRoles` | Any user | Get project roles including custom roles |
 
 ## Usage
@@ -148,6 +159,7 @@ curl -u "user:password" -X POST \
 | `user_password` | `kanpro_user_password_enable` | Password change/reset API |
 | `user_profile` | `kanpro_user_profile_enable` | Profile get/update API (includes avatar) |
 | `project_user` | `kanpro_project_user_enable` | Overrides getProjectUsers/getAssignableUsers |
+| `project_roles` | `kanpro_project_roles_enable` | Overrides getProjectRoles to include custom roles |
 
 ### Get Token
 
@@ -438,6 +450,12 @@ API methods require their feature to be enabled first. If you see:
 |-----|------|-------|
 | 啟用 Project User | 啟用/停用 Project User API | 停用 |
 
+### Project Roles 設定
+
+| 設定 | 說明 | 預設值 |
+|-----|------|-------|
+| 啟用 Project Roles | 啟用/停用 Project Roles API | 停用 |
+
 ## API 方法
 
 ### JWT 認證
@@ -489,6 +507,11 @@ API methods require their feature to be enabled first. If you see:
 | `getAllUsers` | 任何用戶 | 取得所有使用者（含頭像） |
 | `getProjectUsers` | 任何用戶 | 取得專案所有成員的完整使用者物件（含頭像） |
 | `getAssignableUsers` | 任何用戶 | 取得可指派使用者的完整物件（含頭像） |
+
+### Project Roles（覆蓋 Kanboard 內建）
+
+| 方法 | 權限 | 說明 |
+|-----|------|-----|
 | `getProjectRoles` | 任何用戶 | 取得專案角色（含自訂角色） |
 
 ## 使用方式
@@ -530,6 +553,7 @@ curl -u "user:password" -X POST \
 | `user_password` | `kanpro_user_password_enable` | 密碼變更/重設 API |
 | `user_profile` | `kanpro_user_profile_enable` | 個人資料 API（含頭像） |
 | `project_user` | `kanpro_project_user_enable` | 覆蓋 getProjectUsers/getAssignableUsers |
+| `project_roles` | `kanpro_project_roles_enable` | 覆蓋 getProjectRoles 提供自訂角色 |
 
 ### 取得 Token
 

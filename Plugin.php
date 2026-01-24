@@ -81,6 +81,10 @@ class Plugin extends Base
     if ($this->configModel->get('kanpro_project_user_enable', '') === '1') {
       $this->registerProjectUserApi();
     }
+
+    if ($this->configModel->get('kanpro_project_roles_enable', '') === '1') {
+      $this->registerProjectRolesApi();
+    }
   }
 
   /**
@@ -234,6 +238,18 @@ class Plugin extends Base
     $procedureHandler->withClassAndMethod('getAllUsers', $model, 'getAllUsers');
     $procedureHandler->withClassAndMethod('getProjectUsers', $model, 'getProjectUsers');
     $procedureHandler->withClassAndMethod('getAssignableUsers', $model, 'getAssignableUsers');
+  }
+
+  /**
+   * Register Project Roles API methods
+   * Overrides Kanboard's built-in getProjectRoles
+   * to include custom project roles
+   */
+  private function registerProjectRolesApi()
+  {
+    $model = $this->container['kanproProjectUserModel'];
+    $procedureHandler = $this->api->getProcedureHandler();
+
     $procedureHandler->withClassAndMethod('getProjectRoles', $model, 'getProjectRoles');
   }
 
@@ -288,6 +304,7 @@ class Plugin extends Base
     $userPasswordEnabled = $this->configModel->get('kanpro_user_password_enable', '') === '1';
     $userProfileEnabled = $this->configModel->get('kanpro_user_profile_enable', '') === '1';
     $projectUserEnabled = $this->configModel->get('kanpro_project_user_enable', '') === '1';
+    $projectRolesEnabled = $this->configModel->get('kanpro_project_roles_enable', '') === '1';
 
     return [
       'name' => $this->getPluginName(),
@@ -342,6 +359,11 @@ class Plugin extends Base
             ['name' => 'getAllUsers', 'description' => 'Get all users with avatar (overrides Kanboard built-in)'],
             ['name' => 'getProjectUsers', 'description' => 'Get full user objects for project members (overrides Kanboard built-in)'],
             ['name' => 'getAssignableUsers', 'description' => 'Get full user objects for assignable users (overrides Kanboard built-in)'],
+          ],
+        ],
+        'project_roles' => [
+          'enabled' => $projectRolesEnabled,
+          'methods' => [
             ['name' => 'getProjectRoles', 'description' => 'Get project roles including custom roles (overrides Kanboard built-in)'],
           ],
         ],

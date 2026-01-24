@@ -79,6 +79,7 @@ KanproBridge/
 - Registers User Password API when enabled
 - Registers User Profile API when enabled
 - Registers Project User API when enabled
+- Registers Project Roles API when enabled
 - Exposes JSON-RPC API methods
 
 **Feature/JWTAuth/Provider.php** - Implements `PasswordAuthenticationProviderInterface`:
@@ -188,6 +189,10 @@ Token structure includes:
 | `getAllUsers` | - | Any user |
 | `getProjectUsers` | `projectId` | Any user |
 | `getAssignableUsers` | `projectId` | Any user |
+
+#### Project Roles (overrides Kanboard built-in)
+| Method | Parameters | Permission |
+|--------|------------|------------|
 | `getProjectRoles` | `projectId` | Any user |
 
 ### API Testing
@@ -315,6 +320,9 @@ Stored in Kanboard's config model:
 
 **Project User Settings:**
 - `kanpro_project_user_enable` - Enable/disable Project User API
+
+**Project Roles Settings:**
+- `kanpro_project_roles_enable` - Enable/disable Project Roles API
 
 ### Dependencies
 

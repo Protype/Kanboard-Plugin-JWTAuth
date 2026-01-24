@@ -114,6 +114,19 @@
     </div>
   </fieldset>
 
+  <!-- Project Roles Section -->
+  <fieldset>
+    <legend><?= t('Project Roles') ?></legend>
+
+    <div class="form-group">
+      <label for="kanpro_project_roles_enable">
+        <input type="checkbox" name="kanpro_project_roles_enable" value="1" id="kanpro_project_roles_enable" class="form-control" <?= ($this->task->configModel->get('kanpro_project_roles_enable', '') === '1') ? 'checked' : '' ?>>
+        <?= t('Enable Project Roles API') ?>
+      </label>
+      <p class="form-help"><?= t('Overrides getProjectRoles to include custom project roles in addition to built-in roles.') ?></p>
+    </div>
+  </fieldset>
+
   <div class="form-actions">
     <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
   </div>
